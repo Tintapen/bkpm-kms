@@ -1,0 +1,57 @@
+/* =============================
+   FILAMENT CUSTOM DARK/LIGHT MODE
+   ============================= */
+
+/* Warna dasar */
+:root {
+    --filament-light-bg: #ffffff;
+    --filament-dark-bg: #111828;
+    --filament-body-bg: #F9FAFB;
+}
+
+/* ===== BODY (selalu terang) ===== */
+body,
+.fi-body,
+.fi-main {
+    background-color: var(--filament-body-bg) !important;
+}
+
+/* ===== SIDEBAR ===== */
+.fi-sidebar {
+    background-color: var(--filament-light-bg) !important;
+}
+
+html.dark .fi-sidebar {
+    background-color: var(--filament-dark-bg) !important;
+}
+
+/* ===== HEADER ===== */
+.fi-header {
+    background-color: var(--filament-light-bg) !important;
+}
+
+html.dark .fi-header {
+    background-color: var(--filament-dark-bg) !important;
+}
+
+/* ===== TOPBAR ===== */
+.fi-topbar {
+    background-color: var(--filament-light-bg) !important;
+}
+
+html.dark .fi-topbar {
+    background-color: var(--filament-dark-bg) !important;
+}
+
+/* ===== TEKS ===== */
+.fi-header,
+.fi-topbar,
+.fi-sidebar {
+    color: #111827 !important;
+}
+
+html.dark .fi-header,
+html.dark .fi-topbar,
+html.dark .fi-sidebar {
+    color: #F9FAFB !important;
+}

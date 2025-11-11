@@ -1,0 +1,41 @@
+
+@import url('https://fonts.googleapis.com/css?family=Rubik&display=swap');
+
+
+/* .container{
+    margin-top: 170px
+}
+
+.card{
+    border-radius:0 ;
+} */
+
+/* .modal-content{
+    width: calc(290px + 10 * ((100vw - 320px) / 680)) !important;
+} */
+
+/* .modal {
+    background-image: radial-gradient(circle 919px at 1.7% 6.1%, rgb(198, 198, 207) 0%, rgb(133, 208, 240) 100.2%)
+} */
+
+/* .modal-content{
+    background: transparent !important;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.8) ;
+   
+} */
+
+/* .cross{
+    font-size: 25px !important;
+    cursor: pointer;
+} */
+
+/* img{
+    width: 190px !important;
+    transition: 0.5s;
+} */
+
+img:hover{
+    transform: scale(1.2);
+}
+
+

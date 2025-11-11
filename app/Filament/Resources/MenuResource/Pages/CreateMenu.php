@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Filament\Resources\MenuResource\Pages;
+
+use App\Filament\Resources\MenuResource;
+use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Js;
+
+class CreateMenu extends CreateRecord
+{
+    protected static string $resource = MenuResource::class;
+    protected static ?string $title = 'Tambah Menu';
+    protected static ?string $breadcrumb = 'Tambah';
+
+    /**
+     * Override the default Create button to use Indonesian label and blue (primary) color.
+     */
+    protected function getCreateFormAction(): Action
+    {
+        return Action::make('create')
+            ->label('Simpan')
+            ->submit('create')
+            ->keyBindings(['mod+s'])
+            ->color('primary');
+    }
+
+    /**
+     * Override the default Cancel button to use Indonesian label and red (danger) color.
+     */
+    protected function getCancelFormAction(): Action
+    {
+        return Action::make('cancel')
+            ->label('Batal')
+            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = ' . Js::from($this->previousUrl ?? static::getResource()::getUrl()) . ')')
+            ->color('danger');
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCancelFormAction(),
+            $this->getCreateFormAction(),
+        ];
+    }
+
+    /**
+     * Force redirect to the menu list after creating a menu.
+     */
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('index');
+    }
+}

@@ -1,0 +1,264 @@
+/* section milestone */
+
+.circle {
+  width: 125px;
+  height: 125px;
+  border: 15px solid transparent;
+  border-radius: 50%;
+  margin: 0;
+  position: relative;
+}
+.circle1 {
+  border-color: #29bdcc;
+  border-left-color: transparent;
+  border-top-color: transparent;
+}
+.circle2 {
+  border-color: #17556f;
+  border-right-color: transparent;
+}
+.circle3 {
+  border-color: #29bdcc;
+  border-left-color: transparent;
+}
+.circle4 {
+  border-color: #17556f;
+  border-right-color: transparent;
+}
+.circle5 {
+  border-color: #29bdcc;
+  border-left-color: transparent;
+}
+.circle6 {
+  border-color: #17556f;
+  border-right-color: transparent;
+}
+.circle7 {
+  border-color: #29bdcc;
+  border-left-color: transparent;
+}
+.circle8 {
+  border-color: #1b5f8c;
+  border-right-color: transparent;
+}
+.circle h2 {
+  display: table;
+  margin: 5px 0 0 5px;
+  width: 85px;
+  height: 85px;
+  background: #29bdcc;
+  border-radius: 50%;
+}
+.circle2 h2 {
+  background: #17556f;
+}
+.circle3 h2 {
+  background: #29bdcc;
+}
+.circle4 h2 {
+  background: #17556f;
+}
+.circle5 h2 {
+  background: #29bdcc;
+}
+.circle6 h2 {
+  background: #17556f;
+}
+.circle7 h2 {
+  background: #29bdcc;
+}
+.circle8 h2 {
+  background: #17556f;
+}
+.circle span {
+  font-size: 12px;
+  color: #fff;
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+}
+.circle i,
+.circle b {
+  font-weight: bold;
+  font-style: normal;
+  display: block;
+}
+.circle i {
+  font-size: 24px;
+}
+.wrap {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 980px;
+  margin: auto;
+}
+.col {
+  flex: 1 0 50%;
+  display: flex;
+  align-items: center;
+  margin-bottom: -47px;
+  position: relative;
+  left: 23px;
+}
+.col2 {
+  left: -24px;
+}
+.col1 {
+  text-align: right;
+  align-content: flex-end;
+}
+.col1 .content {
+  order: -1;
+}
+.content {
+  flex: 1 0 0%;
+  padding: 1px 10px;
+  margin:-20px 0;
+}
+.content h2 {
+  font-size: 1rem;
+}
+.content p {
+  margin: 0.5em 0 0 0;
+  font-size: 0.8rem;
+  color: #666;
+}
+.circle1:before {
+  content: "";
+  height: 15px;
+  width: 250px;
+  position: absolute;
+  right: 46px;
+  top: -15px;
+  background: #29bdcc;
+  background:linear-gradient(to left, #29bdcc 0%, white 100%);
+  z-index: -1;
+  animation:shimmer 10s infinite forwards;
+}
+@keyframes shimmer{
+	0% {width: 0;}
+	5%{width: 250px;}
+	100%{width: 250px;}
+}
+.circle1:after,
+.circle8:after {
+  content: "";
+  position: absolute;
+  left: -15px;
+  top: -15px;
+  width: 125px;
+  height: 125px;
+  border: 15px solid transparent;
+  border-color: #29bdcc;
+  border-left-color: transparent;
+  border-top-color: transparent;
+  transform: rotate(-45deg);
+  border-radius: 50%;
+  z-index: -1;
+}
+.circle8:after {
+  border-color: #1b5f8c;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  transform: rotate(-45deg);
+}
+.circle8:before {
+  content: "";
+  height: 15px;
+  width: 250px;
+  position: absolute;
+  right: -202px;
+  bottom: -15px;
+  background: #1b5f8c;
+  background:linear-gradient(to right, #1b5f8c 0%, white 100%);
+  z-index: -1;
+}
+.circle8 {
+  border-bottom-color: transparent;
+}
+@media screen and (max-width: 600px) {
+  .wrap {
+    display: block;
+  }
+  .content{margin:0;}
+  .col {
+    margin: 10px 0;
+    position: static;
+  }
+  .circle8:before,
+  .circle8:after,
+  .circle1:before,
+  .circle2:after {
+    display: none;
+  }
+  .circle1 {
+    border-color: #29bdcc;
+  }
+  .circle2 {
+    border-color: #17556f;
+  }
+  .circle3 {
+    border-color: #29bdcc;
+  }
+  .circle4 {
+    border-color: #17556f;
+  }
+  .circle5 {
+    border-color: #29bdcc;
+  }
+  .circle6 {
+    border-color: #17556f;
+  }
+  .circle7 {
+    border-color: #29bdcc;
+  }
+  .circle8 {
+    border-color: #17556f;
+  }
+}
+
+
+/* the following css code is just for fun and can be removed*/
+/* it applies the shimmer down the spiral using <div class="shim"> which can also be removed */
+.shim{
+	position:absolute;
+	z-index:2;
+	left:0;
+	top:0;
+	margin-top:0;
+	width:100%;
+	height:100%;
+	animation:shim 1s linear forwards;
+	transform:rotate(-90deg);
+}
+.shim:after{
+	content:"";
+	position:absolute;
+	left:50%;
+	top:-15px;
+	margin-left:-8px;
+	width:15px;
+	height:15px;
+	background:radial-gradient(#fff, rgba(255,255,255,0));
+}
+.shimx{transform:rotate(90deg);}
+.shimx{animation:shim2 1s linear .75s forwards;}
+
+.shim2{animation-delay:.75s}
+.shim3{animation-delay:1.5s}
+.shim4{animation-delay:2.25s}
+.shim5{animation-delay:3s}
+.shim6{animation-delay:3.75s}
+.shim7{animation-delay:4.5s}
+.shim8{animation-delay:5.25s}
+
+
+@keyframes shim {
+	from{transform:rotate(-90deg);}
+	to{transform:rotate(270deg);}
+}
+@keyframes shim2 {
+	from{transform:rotate(90deg);}
+	to{transform:rotate(-270deg);}
+}
+ /* end section miletone */

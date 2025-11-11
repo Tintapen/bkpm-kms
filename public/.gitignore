@@ -1,0 +1,52 @@
+# Laravel
+/vendor
+/node_modules
+/public/storage
+/storage/*.key
+.env
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+
+# Laravel specific files
+/storage/app/public
+/storage/framework/cache/data
+/storage/framework/sessions
+/storage/framework/testing
+/storage/framework/views
+/storage/logs
+
+# Ignore IDEs and OS generated files
+.idea
+*.sublime-project
+*.sublime-workspace
+*.vscode
+*.DS_Store
+Thumbs.db
+
+# Composer related
+composer.lock
+composer.phar
+
+# NPM/Yarn related
+package-lock.json
+yarn.lock
+
+# Node/Build outputs
+/public/hot
+/public/mix-manifest.json
+/public/css
+/public/js
+
+# Filament plugins or assets (optional, only if you build them separately)
+/resources/js/filament
+/resources/css/filament
+
+# Git hooks and temporary files
+*.log
+*.tmp
+*.swp
+*.bak
+*.orig
