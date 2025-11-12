@@ -35,6 +35,10 @@ class UserResource extends BaseResource
                     ->label('Nama Pengguna')
                     ->required()
                     ->maxLength(100),
+                TextInput::make('email')
+                    ->email()
+                    ->required()
+                    ->unique(ignoreRecord: true),
                 TextInput::make('password')
                     ->label('Password')
                     ->password()
@@ -56,11 +60,16 @@ class UserResource extends BaseResource
                         // Jika tidak diubah, return null agar tidak update
                         return null;
                     })
-                    ->dehydrated(fn($state) => $state !== null && $state !== '********'),
-                TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->unique(ignoreRecord: true),
+                    ->dehydrated(fn($state) => $state !== null && $state !== '********')
+                    ->same('password_confirmation')
+                    ->validationAttribute('Password'),
+
+                TextInput::make('password_confirmation')
+                    ->label('Konfirmasi Password')
+                    ->password()
+                    ->required(fn(callable $get) => filled($get('password')) && $get('password') !== '********')
+                    ->visible(fn(callable $get) => filled($get('password')) && $get('password') !== '********')
+                    ->validationAttribute('Konfirmasi Password'),
                 Select::make('role')
                     ->label('Role')
                     ->options(Role::pluck('name', 'id'))
