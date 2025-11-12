@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
+
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
@@ -39,8 +40,24 @@ class UserResource extends BaseResource
                     ->label('Password')
                     ->password()
                     ->required(fn(string $context): bool => $context === 'create')
-                    ->dehydrateStateUsing(fn($state) => Hash::make($state))
-                    ->hiddenOn('edit'),
+                    ->afterStateHydrated(function ($component, $state, $record) {
+                        if ($record) {
+                            $component->state('********');
+                        }
+                    })
+                    ->dehydrateStateUsing(function ($state, $record) {
+                        // Jika create, hash password apapun yang diisi
+                        if (!$record) {
+                            return $state ? Hash::make($state) : null;
+                        }
+                        // Jika edit, hanya update jika password diubah dari '********'
+                        if ($state && $state !== '********') {
+                            return Hash::make($state);
+                        }
+                        // Jika tidak diubah, return null agar tidak update
+                        return null;
+                    })
+                    ->dehydrated(fn($state) => $state !== null && $state !== '********'),
                 TextInput::make('email')
                     ->email()
                     ->required()
