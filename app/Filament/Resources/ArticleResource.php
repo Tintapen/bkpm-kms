@@ -55,7 +55,6 @@ class ArticleResource extends BaseResource
                     ->searchable()
                     ->required(),
                 TagsInput::make('tags'),
-                FileUpload::make('attachment'),
                 RichEditor::make('excerpt')
                     ->label('Konten Artikel')
                     ->required()
