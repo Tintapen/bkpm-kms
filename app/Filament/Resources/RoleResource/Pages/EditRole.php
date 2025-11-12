@@ -11,8 +11,8 @@ use Illuminate\Support\Str;
 class EditRole extends EditRecord
 {
     protected static string $resource = RoleResource::class;
-    protected static ?string $title = 'Edit Role';
-    protected static ?string $breadcrumb = 'Edit';
+    protected static ?string $title = 'Ubah Role';
+    protected static ?string $breadcrumb = 'Ubah';
 
     /**
      * Override the default Create button to use Indonesian label and blue (primary) color.

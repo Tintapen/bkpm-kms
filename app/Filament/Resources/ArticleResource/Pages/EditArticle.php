@@ -11,8 +11,8 @@ use Illuminate\Support\Js;
 class EditArticle extends EditRecord
 {
     protected static string $resource = ArticleResource::class;
-    protected static ?string $title = 'Edit Artikel';
-    protected static ?string $breadcrumb = 'Edit';
+    protected static ?string $title = 'Ubah Artikel';
+    protected static ?string $breadcrumb = 'Ubah';
 
     /**
      * Override the default Create button to use Indonesian label and blue (primary) color.

@@ -11,8 +11,8 @@ use Illuminate\Support\Js;
 class EditCategory extends EditRecord
 {
     protected static string $resource = CategoryResource::class;
-    protected static ?string $title = 'Edit Kategori';
-    protected static ?string $breadcrumb = 'Edit';
+    protected static ?string $title = 'Ubah Kategori';
+    protected static ?string $breadcrumb = 'Ubah';
 
     /**
      * Override the default Create button to use Indonesian label and blue (primary) color.

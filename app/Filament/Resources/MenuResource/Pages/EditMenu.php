@@ -11,8 +11,8 @@ use Illuminate\Support\Js;
 class EditMenu extends EditRecord
 {
     protected static string $resource = MenuResource::class;
-    protected static ?string $title = 'Edit Menu';
-    protected static ?string $breadcrumb = 'Edit';
+    protected static ?string $title = 'Ubah Menu';
+    protected static ?string $breadcrumb = 'Ubah';
 
     /**
      * Override the default Create button to use Indonesian label and blue (primary) color.
