@@ -23,7 +23,7 @@ $storage = Storage::disk($disk);
                     href="{{ ArticleResource::getUrl('edit', ['record' => $article]) }}" size="sm" color="primary"
                     class="flex items-center gap-1">
                     <x-heroicon-o-pencil-square class="w-4 h-4 flex-shrink-0 inline-block" />
-                    <span>Edit Artikel</span>
+                    <span>Ubah Artikel</span>
                 </x-filament::button>
                 @endcan
             </div>
