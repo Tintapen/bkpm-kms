@@ -44,4 +44,12 @@ class EditMenu extends EditRecord
             $this->getCreateFormAction(),
         ];
     }
+
+    /**
+     * Force redirect to the menu list after creating a menu.
+     */
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('index');
+    }
 }

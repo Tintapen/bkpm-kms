@@ -56,4 +56,12 @@ class EditUser extends EditRecord
             $this->record->syncRoles([]); // Jika tidak ada role, hapus semua
         }
     }
+
+    /**
+     * Force redirect to the user list after creating a user.
+     */
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('index');
+    }
 }

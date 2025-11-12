@@ -66,4 +66,12 @@ class EditRole extends EditRecord
             ->reject(fn($_, $key) => $key === 'permissions_state' || str($key)->startsWith('permissions_group_'))
             ->toArray();
     }
+
+    /**
+     * Force redirect to the role list after creating a role.
+     */
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('index');
+    }
 }

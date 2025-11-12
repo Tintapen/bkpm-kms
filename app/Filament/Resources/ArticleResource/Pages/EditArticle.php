@@ -44,4 +44,12 @@ class EditArticle extends EditRecord
             $this->getCreateFormAction(),
         ];
     }
+
+    /**
+     * Force redirect to the article list after creating a article.
+     */
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('index');
+    }
 }

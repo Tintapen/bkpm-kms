@@ -44,4 +44,12 @@ class EditCategory extends EditRecord
             $this->getCreateFormAction(),
         ];
     }
+
+    /**
+     * Force redirect to the category list after creating a category.
+     */
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('index');
+    }
 }
