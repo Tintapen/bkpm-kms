@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
@@ -98,6 +97,7 @@ class UserResource extends BaseResource
 
     public static function table(Table $table): Table
     {
+        /** @var Table $table */
         return $table
             ->columns([
                 TextColumn::make('name')
