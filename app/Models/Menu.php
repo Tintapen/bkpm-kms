@@ -24,4 +24,35 @@ class Menu extends Model
     {
         return $this->hasMany(Menu::class, 'parent_id')->where('isactive', 'Y')->orderBy('sort');
     }
+
+    protected static function booted()
+    {
+        static::created(function ($menu) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'tambah',
+                'subject_type' => 'Menu',
+                'subject_id' => $menu->id,
+                'description' => 'Menambah menu: ' . $menu->label,
+            ]);
+        });
+        static::updated(function ($menu) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'ubah',
+                'subject_type' => 'Menu',
+                'subject_id' => $menu->id,
+                'description' => 'Mengubah menu: ' . $menu->label,
+            ]);
+        });
+        static::deleted(function ($menu) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'hapus',
+                'subject_type' => 'Menu',
+                'subject_id' => $menu->id,
+                'description' => 'Menghapus menu: ' . $menu->label,
+            ]);
+        });
+    }
 }

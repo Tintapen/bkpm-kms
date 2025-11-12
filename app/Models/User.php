@@ -54,4 +54,35 @@ class User extends Authenticatable
     {
         return $this->roles()->where('context', $context)->exists();
     }
+
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'tambah',
+                'subject_type' => 'Pengguna',
+                'subject_id' => $user->id,
+                'description' => 'Menambah pengguna: ' . $user->name,
+            ]);
+        });
+        static::updated(function ($user) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'ubah',
+                'subject_type' => 'Pengguna',
+                'subject_id' => $user->id,
+                'description' => 'Mengubah pengguna: ' . $user->name,
+            ]);
+        });
+        static::deleted(function ($user) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'hapus',
+                'subject_type' => 'Pengguna',
+                'subject_id' => $user->id,
+                'description' => 'Menghapus pengguna: ' . $user->name,
+            ]);
+        });
+    }
 }

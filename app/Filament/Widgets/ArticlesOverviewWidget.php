@@ -4,7 +4,9 @@ namespace App\Filament\Widgets;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\User;
 use Filament\Widgets\Widget;
+use App\Models\ActivityLog;
 
 class ArticlesOverviewWidget extends Widget
 {
@@ -34,9 +36,9 @@ class ArticlesOverviewWidget extends Widget
         return Category::count();
     }
 
-    public function getTotalViews(): int
+    public function getTotalUsers(): int
     {
-        return Article::sum('views') ?? 0;
+        return User::where('id', '>', 1)->count();
     }
 
     public function getRecentlyViewedArticles()
@@ -47,5 +49,13 @@ class ArticlesOverviewWidget extends Widget
     public function getTopArticles()
     {
         return Article::orderBy('views', 'desc')->take(5)->get();
+    }
+
+    public function getRecentActivities()
+    {
+        return ActivityLog::with('user')
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
     }
 }

@@ -99,4 +99,35 @@ class Category extends Model
         }
         return $count;
     }
+
+    protected static function booted()
+    {
+        static::created(function ($category) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'tambah',
+                'subject_type' => 'Kategori',
+                'subject_id' => $category->id,
+                'description' => 'Menambah kategori: ' . $category->name,
+            ]);
+        });
+        static::updated(function ($category) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'ubah',
+                'subject_type' => 'Kategori',
+                'subject_id' => $category->id,
+                'description' => 'Mengubah kategori: ' . $category->name,
+            ]);
+        });
+        static::deleted(function ($category) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'hapus',
+                'subject_type' => 'Kategori',
+                'subject_id' => $category->id,
+                'description' => 'Menghapus kategori: ' . $category->name,
+            ]);
+        });
+    }
 }

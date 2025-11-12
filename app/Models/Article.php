@@ -672,5 +672,33 @@ class Article extends Model
                 }
             }
         });
+
+        static::created(function ($article) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'tambah',
+                'subject_type' => 'Artikel',
+                'subject_id' => $article->id,
+                'description' => 'Menambah artikel: ' . $article->title,
+            ]);
+        });
+        static::updated(function ($article) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'ubah',
+                'subject_type' => 'Artikel',
+                'subject_id' => $article->id,
+                'description' => 'Mengubah artikel: ' . $article->title,
+            ]);
+        });
+        static::deleted(function ($article) {
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'hapus',
+                'subject_type' => 'Artikel',
+                'subject_id' => $article->id,
+                'description' => 'Menghapus artikel: ' . $article->title,
+            ]);
+        });
     }
 }

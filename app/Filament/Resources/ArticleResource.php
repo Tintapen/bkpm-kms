@@ -18,6 +18,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Select;
+use ZipStream\File;
 
 class ArticleResource extends BaseResource
 {
@@ -54,6 +55,7 @@ class ArticleResource extends BaseResource
                     ->searchable()
                     ->required(),
                 TagsInput::make('tags'),
+                FileUpload::make('attachment'),
                 RichEditor::make('excerpt')
                     ->label('Konten Artikel')
                     ->required()
