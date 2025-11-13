@@ -60,7 +60,7 @@ use App\Filament\Resources\ArticleResource;
         @php
         $articlesData = [];
         @endphp
-        @can('ringkasan_aktivitas_admin')
+        @can('aktivitas_terbaru_admin')
         @php
         $articlesData[] = [
         'title' => 'Aktivitas Terbaru',
