@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Spatie\Permission\Models\Role as SpatieRole;
+use App\Models\ActivityLog;
 
 class Role extends SpatieRole
 {
@@ -15,31 +16,37 @@ class Role extends SpatieRole
     protected static function booted()
     {
         static::created(function ($role) {
-            ActivityLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'tambah',
-                'subject_type' => 'Role',
-                'subject_id' => $role->id,
-                'description' => 'Menambah role: ' . $role->name,
-            ]);
+            if (auth()->check()) {
+                ActivityLog::create([
+                    'user_id' => auth()->id(),
+                    'action' => 'tambah',
+                    'subject_type' => 'Role',
+                    'subject_id' => $role->id,
+                    'description' => 'Menambah role: ' . $role->name,
+                ]);
+            }
         });
         static::updated(function ($role) {
-            ActivityLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'ubah',
-                'subject_type' => 'Role',
-                'subject_id' => $role->id,
-                'description' => 'Mengubah role: ' . $role->name,
-            ]);
+            if (auth()->check()) {
+                ActivityLog::create([
+                    'user_id' => auth()->id(),
+                    'action' => 'ubah',
+                    'subject_type' => 'Role',
+                    'subject_id' => $role->id,
+                    'description' => 'Mengubah role: ' . $role->name,
+                ]);
+            }
         });
         static::deleted(function ($role) {
-            ActivityLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'hapus',
-                'subject_type' => 'Role',
-                'subject_id' => $role->id,
-                'description' => 'Menghapus role: ' . $role->name,
-            ]);
+            if (auth()->check()) {
+                ActivityLog::create([
+                    'user_id' => auth()->id(),
+                    'action' => 'hapus',
+                    'subject_type' => 'Role',
+                    'subject_id' => $role->id,
+                    'description' => 'Menghapus role: ' . $role->name,
+                ]);
+            }
         });
     }
 }
