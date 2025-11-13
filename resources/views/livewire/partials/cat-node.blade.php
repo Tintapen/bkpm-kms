@@ -2,7 +2,7 @@
 use App\Filament\Resources\ArticleResource;
 @endphp
 <li>
-    <div class="flex items-center justify-between px-2 py-2 rounded-lg text-sm category-node transition-all duration-150"
+    <div class="flex items-center justify-between px-2 py-2 rounded-lg text-[1.15rem] category-node transition-all duration-150"
         @if(($selectedCategoryId ?? null) == $node->id)
             style="background: #f8fafc; border: 1px solid #e5e7eb; color: #2563eb; font-weight: 600; margin-left: {{ ($level ?? 0) * 20 }}px; cursor:pointer;"
         @else
@@ -20,8 +20,8 @@ use App\Filament\Resources\ArticleResource;
         <div class="flex items-center gap-2 w-full">
             <span class="w-6 flex-shrink-0 flex items-center justify-center">
                 <x-heroicon-o-folder
-                    style="color: {{ ($selectedCategoryId ?? null) == $node->id ? '#2563eb' : (in_array($node->id, $open) ? '#3b82f6' : '#64748b') }}; display: inline;"
-                    class="w-5 h-5 transition-colors duration-150" />
+                    style="color: {{ ($selectedCategoryId ?? null) == $node->id ? '#2563eb' : (in_array($node->id, $open) ? '#3b82f6' : '#64748b') }}; display: inline; font-size:1.6rem; width:2.1rem; height:2.1rem;"
+                    class="transition-colors duration-150" />
             </span>
             <span style="font-weight: {{ ($selectedCategoryId ?? null) == $node->id ? '600' : '500' }}; color: {{ ($selectedCategoryId ?? null) == $node->id ? '#2563eb' : (in_array($node->id, $open) ? '#1d4ed8' : '#1e293b') }};" class="font-medium w-full">
                 {{ $node->name }}

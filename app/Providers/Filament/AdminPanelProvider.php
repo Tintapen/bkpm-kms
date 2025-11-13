@@ -93,6 +93,14 @@ class AdminPanelProvider extends PanelProvider
         .fi-sidebar {
             background-color: var(--filament-light-bg) !important;
         }
+        .fi-sidebar .fi-sidebar-item {
+            font-size: 1.15rem !important;
+        }
+        .fi-sidebar .fi-sidebar-item .fi-sidebar-item-icon {
+            font-size: 1.6rem !important;
+            width: 2.1rem !important;
+            height: 2.1rem !important;
+        }
         .dark .fi-topbar,
         .dark .fi-header {
             background-color: var(--filament-dark-bg) !important;
