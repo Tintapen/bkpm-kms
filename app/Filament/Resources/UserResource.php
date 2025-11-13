@@ -63,12 +63,10 @@ class UserResource extends BaseResource
                     ->dehydrated(fn($state) => $state !== null && $state !== '********')
                     ->same('password_confirmation')
                     ->validationAttribute('Password'),
-
                 TextInput::make('password_confirmation')
                     ->label('Konfirmasi Password')
                     ->password()
                     ->required(fn(callable $get) => filled($get('password')) && $get('password') !== '********')
-                    ->visible(fn(callable $get) => filled($get('password')) && $get('password') !== '********')
                     ->validationAttribute('Konfirmasi Password'),
                 Select::make('role')
                     ->label('Role')
