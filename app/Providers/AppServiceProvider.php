@@ -14,6 +14,7 @@ use Illuminate\Pagination\Paginator;
 use App\Helpers\PermissionHelper;
 use App\Http\Livewire\NotificationBell;
 use App\Http\Livewire\Sidebar;
+use App\Http\Livewire\GlobalSearch;
 use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
@@ -36,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
         $this->panelSettings();
         Paginator::useBootstrapFive();
         Livewire::component('notification-bell', NotificationBell::class);
+        Livewire::component('global-search', GlobalSearch::class);
         Livewire::component('sidebar', Sidebar::class);
     }
 
