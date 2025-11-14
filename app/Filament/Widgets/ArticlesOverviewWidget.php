@@ -53,7 +53,10 @@ class ArticlesOverviewWidget extends Widget
 
     public function getRecentActivities()
     {
+        $user = auth()->user();
+
         return ActivityLog::with('user')
+            ->where('user_id', $user?->id)
             ->orderByDesc('created_at')
             ->limit(10)
             ->get();
