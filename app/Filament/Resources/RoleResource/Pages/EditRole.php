@@ -55,7 +55,6 @@ class EditRole extends EditRecord
             }
         }
 
-        logger("info", [$permissions]);
         $this->record->syncPermissions($permissions);
     }
 
