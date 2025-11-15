@@ -96,9 +96,8 @@ $storage = Storage::disk($disk);
                     {!! $article->getExcerptText() !!}
 
                     {{-- Attachment --}}
-                    @can('download_articles')
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                        <div x-data="{ show: false, fileUrl: '', fileType: '', fileName: '' }">
+                        <div x-data="{ show: false, fileUrl: '', fileType: '', fileName: '' }" class="space-y-3">
                             @foreach ($article->getAttachments() as $url)
                             @php
                             $filename = basename(parse_url($url, PHP_URL_PATH));
@@ -166,6 +165,7 @@ $storage = Storage::disk($disk);
                                         </svg>
                                         Preview
                                     </button>
+                                    @can('download_articles')
                                     <a href="{{ $url }}" target="_blank"
                                         style="display:flex;align-items:center;gap:0.25rem;font-size:0.75rem;padding:0.25rem 0.9rem;border-radius:0.375rem;background:#2563eb;color:#fff;border:1px solid #2563eb;transition:all .2s;text-decoration:none;width:100%;max-width:140px;justify-content:center;"
                                         onmouseover="this.style.background='#1d4ed8';this.style.color='#fff'"
@@ -177,6 +177,7 @@ $storage = Storage::disk($disk);
                                         </svg>
                                         Download
                                     </a>
+                                    @endcan
                                 </div>
                             </div>
                             @endforeach
@@ -219,6 +220,7 @@ $storage = Storage::disk($disk);
                                             :src="'https://docs.google.com/gview?url=' + encodeURIComponent(fileUrl) + '&embedded=true'"
                                             class="w-full h-96 rounded bg-white" frameborder="0"></iframe>
                                     </template>
+                                    @can('download_articles')
                                     <template
                                         x-if="['doc','docx','xls','xlsx','ppt','pptx'].includes(fileType) && !(fileUrl.startsWith('http://') || fileUrl.startsWith('https://'))">
                                         <div class="text-gray-500 dark:text-gray-300 text-center py-8">
@@ -230,23 +232,25 @@ $storage = Storage::disk($disk);
                                                 onmouseout="this.style.textDecoration='none'">Download file</a>
                                         </div>
                                     </template>
+                                    @endcan
                                     <template
                                         x-if="!['jpg','jpeg','png','gif','webp','bmp','pdf','mp4','webm','ogg','csv','doc','docx','xls','xlsx','ppt','pptx'].includes(fileType)">
                                         <div class="text-gray-500 dark:text-gray-300 text-center py-8">
                                             Tidak dapat preview file ini.
                                         </div>
                                     </template>
+                                    @can('download_articles')
                                     <div class="mt-6 text-center">
                                         <a :href="fileUrl" target="_blank"
                                             style="color:#2563eb;text-decoration:none;font-size:15px;"
                                             onmouseover="this.style.textDecoration='underline'"
                                             onmouseout="this.style.textDecoration='none'">Download file</a>
                                     </div>
+                                    @endcan
                                 </div>
                             </div>
                         </div>
                     </div>
-                    @endcan
                 </div>
 
 
