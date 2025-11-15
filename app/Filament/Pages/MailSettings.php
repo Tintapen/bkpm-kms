@@ -70,7 +70,7 @@ class MailSettings extends Page
             MailSetting::updateOrCreate([], $this->formData);
 
             Notification::make()
-                ->title('Saved')
+                ->title('Data berhasil disimpan')
                 ->success()
                 ->send();
         } catch (\Exception $e) {
@@ -78,7 +78,7 @@ class MailSettings extends Page
             logger()->error('Failed to save mail settings: ' . $e->getMessage());
 
             Notification::make()
-                ->title('Failed to save mail settings.')
+                ->title('Gagal menyimpan pengaturan email')
                 ->body($e->getMessage())
                 ->danger()
                 ->send();
@@ -103,20 +103,20 @@ class MailSettings extends Page
             ]);
 
             // Kirim email
-            Mail::raw('This is a test email from your application.', function ($message) use ($mail) {
+            Mail::raw('Ini adalah email percobaan dari aplikasi Anda.', function ($message) use ($mail) {
                 $message->to($mail->from_address)
-                    ->subject('Test Email');
+                    ->subject('Email Percobaan');
             });
 
             Notification::make()
-                ->title('Test email sent successfully.')
+                ->title('Test email berhasil dikirim')
                 ->success()
                 ->send();
         } catch (\Throwable $e) {
-            logger()->error('Test email failed: ' . $e->getMessage());
+            logger()->error('Test email gagal dikirim: ' . $e->getMessage());
 
             Notification::make()
-                ->title('Failed to send test email')
+                ->title('Gagal mengirim email percobaan')
                 ->body($e->getMessage())
                 ->danger()
                 ->send();
