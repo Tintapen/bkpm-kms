@@ -21,7 +21,12 @@ class ArticleCreatedNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast'];
+        $channels = ['database', 'broadcast'];
+        // Only send mail if user wants email notification
+        if (isset($notifiable->emailnotif) && $notifiable->emailnotif === 'Y') {
+            $channels[] = 'mail';
+        }
+        return $channels;
     }
 
     public function toDatabase($notifiable)

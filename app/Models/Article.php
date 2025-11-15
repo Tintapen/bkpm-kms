@@ -283,8 +283,7 @@ class Article extends Model
     protected static function booted()
     {
         static::created(function ($article) {
-            // $admins = User::where('role', 'admin')->get();
-            User::chunk(100, function ($users) use ($article) {
+            User::where('articleupdate', 'Y')->chunk(100, function ($users) use ($article) {
                 foreach ($users as $user) {
                     $user->notify(new ArticleCreatedNotification($article));
                 }
