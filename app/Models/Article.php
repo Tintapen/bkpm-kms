@@ -288,6 +288,36 @@ class Article extends Model
                     $user->notify(new ArticleCreatedNotification($article));
                 }
             });
+
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'tambah',
+                'subject_type' => 'Artikel',
+                'subject_id' => $article->id,
+                'description' => 'Menambah artikel: ' . $article->title,
+            ]);
+        });
+
+        static::updated(function ($article) {
+            $user = auth()->user();
+
+            if ($user->hasRoleContext('Viewer')) {
+                ActivityLog::create([
+                    'user_id' => auth()->id(),
+                    'action' => 'lihat',
+                    'subject_type' => 'Artikel',
+                    'subject_id' => $article->id,
+                    'description' => 'Melihat artikel: ' . $article->title,
+                ]);
+            } else {
+                ActivityLog::create([
+                    'user_id' => auth()->id(),
+                    'action' => 'ubah',
+                    'subject_type' => 'Artikel',
+                    'subject_id' => $article->id,
+                    'description' => 'Mengubah artikel: ' . $article->title,
+                ]);
+            }
         });
 
         static::saving(function (Article $model) {
@@ -673,24 +703,6 @@ class Article extends Model
             }
         });
 
-        static::created(function ($article) {
-            ActivityLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'tambah',
-                'subject_type' => 'Artikel',
-                'subject_id' => $article->id,
-                'description' => 'Menambah artikel: ' . $article->title,
-            ]);
-        });
-        static::updated(function ($article) {
-            ActivityLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'ubah',
-                'subject_type' => 'Artikel',
-                'subject_id' => $article->id,
-                'description' => 'Mengubah artikel: ' . $article->title,
-            ]);
-        });
         static::deleted(function ($article) {
             ActivityLog::create([
                 'user_id' => auth()->id(),
