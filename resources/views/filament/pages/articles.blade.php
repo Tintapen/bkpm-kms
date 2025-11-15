@@ -55,7 +55,10 @@ use App\Filament\Resources\ArticleResource;
                     <div class="flex gap-2">
                         {{-- Download --}}
                         @can('download_articles')
-                        @if($article->getFirstAttachmentUrl())
+                        @php
+                        $attachments = $article->getAttachments();
+                        @endphp
+                        @if(count($attachments) === 1 && $article->getFirstAttachmentUrl())
                         <x-filament::icon-button icon="heroicon-o-arrow-down-tray" tag="a" title="Download Dokumen"
                             href="{{ $article->getFirstAttachmentUrl() }}" target="_blank" rel="noopener noreferrer"
                             color="success" />
