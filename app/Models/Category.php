@@ -13,6 +13,16 @@ class Category extends Model
 
     protected $fillable = ['name', 'isactive', 'level', 'parent_id'];
 
+    public function setLevelAttribute($value)
+    {
+        $this->attributes['level'] = $value;
+
+        // Jika level 1, pastikan parent_id selalu null
+        if ((int)$value === 1) {
+            $this->attributes['parent_id'] = null;
+        }
+    }
+
     public function parent()
     {
         return $this->belongsTo(Category::class, 'parent_id');

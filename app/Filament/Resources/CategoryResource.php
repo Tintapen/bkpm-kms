@@ -42,9 +42,9 @@ class CategoryResource extends BaseResource
                     ->label('Level')
                     ->options(collect(range(1, 4))->mapWithKeys(fn($i) => [$i => "$i"]))
                     ->live()
-                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get, $state) {
-                        // Reset principal if level > 1
-                        if ((int) $state > 1) {
+                    ->afterStateHydrated(function (Forms\Set $set, $state) {
+                        // Pastikan parent_id null jika level 1 saat load form
+                        if ((int) $state === 1) {
                             $set('parent_id', null);
                         }
                     })
@@ -96,7 +96,6 @@ class CategoryResource extends BaseResource
                     })
                     ->reactive()
                     ->visible(fn(Forms\Get $get) => (int)$get('level') > 1)
-                    ->afterStateUpdated(fn($state, Forms\Set $set) => $set('parent_id', $state))
                     ->searchable()
                     ->preload(),
             ]);
