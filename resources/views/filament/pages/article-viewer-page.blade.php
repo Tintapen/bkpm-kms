@@ -141,6 +141,12 @@ $storage = Storage::disk($disk);
     function renderTrixAttachments() {
         const figures = document.querySelectorAll("figure[data-trix-attachment]");
 
+        // Ambil URL download dari backend jika hanya satu attachment
+        let backendDownloadUrl = null;
+        if (window.backendAttachmentUrl) {
+            backendDownloadUrl = window.backendAttachmentUrl;
+        }
+
         figures.forEach(fig => {
             const data = JSON.parse(fig.dataset.trixAttachment);
 
@@ -154,6 +160,9 @@ $storage = Storage::disk($disk);
 
             // Remove default spacing
             fig.style.margin = "0";
+
+            // Gunakan backendDownloadUrl jika ada, jika tidak fallback ke url lama
+            const downloadUrl = backendDownloadUrl || url;
 
             // Build the custom card UI
             fig.innerHTML = `
@@ -192,7 +201,7 @@ $storage = Storage::disk($disk);
                         
                         <!-- PREVIEW BUTTON -->
                         <a href="javascript:void(0)"
-                            onclick="openPreview('${url}', '${filename}')"
+                            onclick="openPreview('${downloadUrl}', '${filename}')"
                             class="flex items-center justify-center gap-1 text-xs font-medium px-4 py-2 rounded-md w-full text-white"
                             style="background:#22c55e; text-decoration:none;">
                             <x-heroicon-o-eye class="w-4 h-4" />
@@ -200,7 +209,7 @@ $storage = Storage::disk($disk);
                         </a>
 
                         <!-- DOWNLOAD -->
-                        <a href="${url}" download="${filename}"
+                        <a href="${downloadUrl}" download="${filename}"
                             class="flex items-center justify-center gap-1 text-xs font-medium px-4 py-2 rounded-md w-full text-white"
                             style="background:#2563eb; text-decoration:none;"
                             onmouseover="this.style.background='#1d4ed8'"
@@ -227,25 +236,45 @@ $storage = Storage::disk($disk);
     document.addEventListener("livewire:navigated", () => setTimeout(renderTrixAttachments, 60));
     document.addEventListener("DOMContentLoaded", () => setTimeout(renderTrixAttachments, 80));
 
+    // Set window.backendAttachmentUrl dari backend jika hanya satu attachment
+    @php
+        $attachments = $article->getAttachments();
+        if (count($attachments) === 1) {
+            echo 'window.backendAttachmentUrl = ' . json_encode($article->getFirstAttachmentUrl()) . ";\n";
+        }
+    @endphp
+
     function openPreview(url, title) {
         document.getElementById("modalTitle").innerText = title;
         const ext = title.split('.').pop().toLowerCase();
         const previewContent = document.getElementById("previewContent");
         let html = '';
-            if (["jpg","jpeg","png","gif","webp","bmp","svg"].includes(ext)) {
-                html = `<img src="${url}" alt="${title}" style="max-width:100%; max-height:65vh; border-radius:12px; box-shadow:0 2px 8px #0002; background:#fff;" />`;
-            } else if (["mp3","wav","ogg","aac","m4a"].includes(ext)) {
-                html = `<audio controls style="width:100%; max-width:600px;"><source src="${url}">Browser tidak mendukung audio.</audio>`;
-            } else if (["mp4","webm","ogg","mov","mkv"].includes(ext)) {
-                html = `<video controls style="max-width:100%; max-height:65vh; border-radius:12px; background:#000;"><source src="${url}">Browser tidak mendukung video.</video>`;
-            } else if (ext === "pdf") {
-                html = `<iframe src="${url}" frameborder="0" style="width:100%; height:70vh; min-height:300px; max-height:80vh; border-radius:12px; background:#fff;"></iframe>`;
-            } else {
-                // Google Docs Viewer for other docs (doc, docx, xls, xlsx, ppt, pptx, etc)
-                const gview = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
-                html = `<iframe src="${gview}" frameborder="0" style="width:100%; height:70vh; min-height:300px; max-height:80vh; border-radius:12px; background:#fff;"></iframe>`;
-            }
+        if (["jpg","jpeg","png","gif","webp","bmp","svg"].includes(ext)) {
+            html = `<img src="${url}" alt="${title}" style="max-width:100%; max-height:65vh; border-radius:12px; box-shadow:0 2px 8px #0002; background:#fff;" />`;
+        } else if (["mp3","wav","ogg","aac","m4a"].includes(ext)) {
+            html = `<audio controls style="width:100%; max-width:600px;"><source src="${url}">Browser tidak mendukung audio.</audio>`;
+        } else if (["mp4","webm","ogg","mov","mkv"].includes(ext)) {
+            html = `<video controls style="max-width:100%; max-height:65vh; border-radius:12px; background:#000;"><source src="${url}">Browser tidak mendukung video.</video>`;
+        } else if (ext === "pdf") {
+            html = `<iframe src="${url}" frameborder="0" style="width:100%; height:70vh; min-height:300px; max-height:80vh; border-radius:12px; background:#fff;"></iframe>`;
+        } else {
+            // Google Docs Viewer for other docs (doc, docx, xls, xlsx, ppt, pptx, etc)
+            const gview = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+            html = `<iframe src="${gview}" frameborder="0" style="width:100%; height:70vh; min-height:300px; max-height:80vh; border-radius:12px; background:#fff;"></iframe>`;
+        }
         previewContent.innerHTML = html;
+
+        // Set download link in modal
+        let downloadUrl = url;
+        if (window.backendAttachmentUrl) {
+            downloadUrl = window.backendAttachmentUrl;
+        }
+        const downloadLink = document.getElementById("downloadLink");
+        if (downloadLink) {
+            downloadLink.href = downloadUrl;
+            downloadLink.setAttribute('download', title);
+        }
+
         document.getElementById("modalPreview").classList.remove("hidden");
     }
 

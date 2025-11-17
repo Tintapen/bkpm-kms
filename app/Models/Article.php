@@ -321,173 +321,123 @@ class Article extends Model
         });
 
         static::saving(function (Article $model) {
-            // --- Hapus file orphan di tmp yang tidak direferensikan di excerpt ---
-            try {
-                $disk = $model->attachment_disk ?? 'public';
-                $storage = Storage::disk($disk);
-                $excerpt = $model->excerpt ?? '';
-                $referencedTmp = [];
-                if (preg_match_all('/articles\/tmp\/([A-Za-z0-9_\-\.]+)/i', $excerpt, $tmpMatches) && !empty($tmpMatches[1])) {
-                    $referencedTmp = array_map(function ($f) {
-                        return 'articles/tmp/' . $f;
-                    }, $tmpMatches[1]);
-                }
-                $allTmpFiles = $storage->files('articles/tmp');
-                foreach ($allTmpFiles as $tmpFile) {
-                    if (!in_array($tmpFile, $referencedTmp)) {
-                        try {
-                            $storage->delete($tmpFile);
-                        } catch (\Throwable $e) {
-                        }
-                    }
-                }
-            } catch (\Throwable $e) {
-            }
-            // If the excerpt contains more than one attachment, block the save and
-            // return a validation error. We count attachments that reference the
-            // articles path (both tmp and final) inside the excerpt HTML.
-            $excerpt = $model->excerpt ?? '';
 
-            // Find candidate attachment references in the excerpt. We will only
-            // count attachments that actually reference an existing file or have a
-            // non-empty URL/href in the Trix attachment metadata. This allows the
-            // user to remove an attachment client-side and avoid false positives.
-            $candidates = [];
-
-            // 1) storage/articles/... or articles/tmp/... occurrences
-            if (preg_match_all('/(?:storage\/articles|articles\/tmp)\/[^"\'\s>]+/i', $excerpt, $matches)) {
-                foreach ($matches[0] as $m) {
-                    $candidates[] = $m;
-                }
-            }
-
-            // 2) data-trix-attachment JSON blobs -> try to decode and check url/href
-            if (preg_match_all('/data-trix-attachment="([^"]+)"/i', $excerpt, $trixMatches)) {
-                foreach ($trixMatches[1] as $jsonHtml) {
-                    // decode HTML entities then decode JSON
-                    $json = html_entity_decode($jsonHtml);
-                    $data = json_decode($json, true);
-                    if (is_array($data)) {
-                        // prefer url or href if present
-                        if (! empty($data['url']) || ! empty($data['href'])) {
-                            $candidates[] = $data['url'] ?: $data['href'];
-                        } elseif (! empty($data['filename'])) {
-                            // fallback: check for a filename reference inside tmp or articles
-                            $candidates[] = $data['filename'];
-                        }
-                    }
-                }
-            }
-
-            // Normalize and resolve candidates to actual storage files or valid URLs.
-            // We want to count DISTINCT resolved files (so tmp + final references to
-            // the same file count as 1). Unresolvable strings are ignored.
             $disk = $model->attachment_disk ?? 'public';
             $storage = Storage::disk($disk);
 
-            // Helper to search storage/articles by basename (we use similar logic
-            // to getFirstAttachmentUrl's searchByBasename)
-            $searchByBasename = function (string $basename) use ($storage) {
-                $basename = trim($basename);
-                if ($basename === '') {
-                    return null;
-                }
+            $excerpt = $model->excerpt ?? '';
+            $newExcerpt = $excerpt;
 
-                $candName = pathinfo($basename, PATHINFO_FILENAME);
-                $candNorm = preg_replace('/[^a-z0-9]/', '', strtolower($candName));
+            $tmpPattern = '/(?:https?:\/\/[^\s"]+)?\/?storage\/articles\/tmp\/([^"\'\s>]+)
+                  |articles\/tmp\/([^"\'\s>]+)/ix';
 
-                try {
-                    foreach ($storage->files('articles') as $f) {
-                        $storedBase = pathinfo($f, PATHINFO_FILENAME);
-                        $storedNorm = preg_replace('/[^a-z0-9]/', '', strtolower($storedBase));
+            preg_match_all($tmpPattern, $excerpt, $matches);
 
-                        if (strtolower($storedBase) === strtolower($candName)) {
-                            return $f;
-                        }
-                        if ($candNorm !== '' && (strpos($storedNorm, $candNorm) !== false || strpos($candNorm, $storedNorm) !== false)) {
-                            return $f;
-                        }
-                    }
-                } catch (\Throwable $e) {
-                    // ignore
-                }
+            // Gabungkan hasil match group 1 & 2
+            $tmpFiles = array_filter(array_merge(
+                $matches[1] ?? [],
+                $matches[2] ?? []
+            ));
 
-                return null;
-            };
+            if (empty($tmpFiles)) {
+                Log::info("Tidak ada TMP file ditemukan.");
+                return;
+            }
 
-            $resolved = [];
-            foreach (array_unique($candidates) as $cand) {
-                $cand = trim($cand);
-                if (empty($cand)) {
+            Log::info("TMP FILES DITEMUKAN:", $tmpFiles);
+
+            foreach ($tmpFiles as $tmpFileName) {
+
+                $tmpRelative = "articles/tmp/" . $tmpFileName;
+
+                // PASTIKAN FILE ADA
+                if (!$storage->exists($tmpRelative)) {
+
+                    // DEBUG: list semua file di tmp untuk membandingkan
+                    Log::warning("TMP TIDAK ADA: $tmpRelative", [
+                        'available_tmp_files' => $storage->files('articles/tmp')
+                    ]);
+
                     continue;
                 }
-                // ...existing code for candidate resolution...
-                // (no file move logic here)
-            }
 
-            // --- Pindahkan semua file tmp yang direferensikan di excerpt ke folder articles/ ---
-            $newExcerpt = $excerpt;
-            if (preg_match_all('/storage\/articles\/tmp\/([A-Za-z0-9_\-\.]+)/i', $excerpt, $matches) && !empty($matches[1])) {
-                foreach ($matches[1] as $tmpFile) {
-                    $tmpPath = 'articles/tmp/' . $tmpFile;
-                    if ($storage->exists($tmpPath)) {
-                        $date = now()->format('Ymd_His');
-                        $originalName = pathinfo($tmpFile, PATHINFO_BASENAME);
-                        $baseName = pathinfo($originalName, PATHINFO_FILENAME);
-                        $ext = pathinfo($originalName, PATHINFO_EXTENSION);
-                        $finalName = 'articles/' . $baseName . '_' . $date;
-                        if ($ext) {
-                            $finalName .= '.' . $ext;
-                        }
-                        $i = 1;
-                        $baseFinal = 'articles/' . $baseName . '_' . $date;
-                        if ($ext) {
-                            $baseFinal .= '.' . $ext;
-                        }
-                        while ($storage->exists($finalName)) {
-                            $finalName = 'articles/' . $baseName . '-' . $i . '_' . $date;
-                            if ($ext) {
-                                $finalName .= '.' . $ext;
-                            }
-                            $i++;
-                        }
-                        try {
-                            $moved = Storage::disk($disk)->move($tmpPath, $finalName);
-                            if (! $moved) {
-                                $contents = Storage::disk($disk)->get($tmpPath);
-                                $put = Storage::disk($disk)->put($finalName, $contents);
-                                if (Storage::disk($disk)->exists($finalName)) {
-                                    Storage::disk($disk)->delete($tmpPath);
-                                }
-                            }
-                            // Replace URLs in excerpt from tmp -> final
-                            $oldCandidates = [];
-                            try {
-                                $oldCandidates[] = $storage->url($tmpPath);
-                            } catch (\Throwable $e) {
-                            }
-                            try {
-                                $oldCandidates[] = rtrim(config('app.url'), '/') . $storage->url($tmpPath);
-                            } catch (\Throwable $e) {
-                            }
-                            $oldCandidates[] = url('/storage/' . ltrim($tmpPath, '/'));
-                            $newUrl = $storage->url($finalName);
-                            foreach (array_unique($oldCandidates) as $oldUrl) {
-                                if (empty($oldUrl)) continue;
-                                $newExcerpt = str_replace($oldUrl, $newUrl, $newExcerpt);
-                            }
-                        } catch (\Throwable $e) {
-                            Log::error('[Article Move] Exception saat move/copy', [
-                                'error' => $e->getMessage()
-                            ]);
-                        }
+                $ext = pathinfo($tmpFileName, PATHINFO_EXTENSION);
+                $base = pathinfo($tmpFileName, PATHINFO_FILENAME);
+
+                $date = now()->format('Ymd_His');
+                $finalRelative = "articles/{$base}_{$date}." . $ext;
+
+                // jika bentrok → increment
+                $i = 1;
+                while ($storage->exists($finalRelative)) {
+                    $finalRelative = "articles/{$base}_{$date}_{$i}." . $ext;
+                    $i++;
+                }
+
+                try {
+                    $tmpFull = $storage->path($tmpRelative);
+                    $finalFull = $storage->path($finalRelative);
+
+                    // Native rename (lebih cepat)
+                    $moved = @rename($tmpFull, $finalFull);
+
+                    if (!$moved) {
+                        // fallback copy
+                        $content = $storage->get($tmpRelative);
+                        $storage->put($finalRelative, $content);
+                        $storage->delete($tmpRelative);
+                    }
+
+                    Log::info("TMP → FINAL OK", [
+                        'tmp'   => $tmpRelative,
+                        'final' => $finalRelative,
+                    ]);
+                } catch (\Throwable $e) {
+                    Log::error("GAGAL MEMINDAHKAN FILE TMP", [
+                        'tmp'   => $tmpRelative,
+                        'final' => $finalRelative,
+                        'error' => $e->getMessage()
+                    ]);
+                    continue;
+                }
+
+                $newUrl = $storage->url($finalRelative);
+
+                $oldPatterns = [
+                    "articles/tmp/$tmpFileName",
+                    "/storage/articles/tmp/$tmpFileName",
+                    url("/storage/articles/tmp/$tmpFileName"),
+                ];
+
+                foreach ($oldPatterns as $old) {
+                    if (!empty($old)) {
+                        $newExcerpt = str_replace($old, $newUrl, $newExcerpt);
                     }
                 }
-                $model->excerpt = $newExcerpt;
-            }
-        });
 
-        // (logic moved to saving event above)
+                // Update juga filename, url, dan href di data-trix-attachment JSON
+                $newFileName = basename($finalRelative);
+                // Ganti "filename":"$tmpFileName" menjadi nama file baru
+                $newExcerpt = preg_replace(
+                    '/("filename"\s*:\s*")' . preg_quote($tmpFileName, '/') . '(")/i',
+                    '$1' . $newFileName . '$2',
+                    $newExcerpt
+                );
+                // Ganti "url":"...tmp..." dan "href":"...tmp..." menjadi $newUrl
+                $newExcerpt = preg_replace(
+                    '/("url"\s*:\s*")([^"\n]*' . preg_quote($tmpFileName, '/') . ')(")/i',
+                    '$1' . $newUrl . '$3',
+                    $newExcerpt
+                );
+                $newExcerpt = preg_replace(
+                    '/("href"\s*:\s*")([^"\n]*' . preg_quote($tmpFileName, '/') . ')(")/i',
+                    '$1' . $newUrl . '$3',
+                    $newExcerpt
+                );
+            }
+
+            $model->excerpt = $newExcerpt;
+        });
 
         static::deleting(function (Article $model) {
             $storage = Storage::disk('public');
