@@ -92,167 +92,9 @@ $storage = Storage::disk($disk);
                 <hr class="my-4 border-gray-200 dark:border-gray-700">
 
                 {{-- Konten --}}
-                <div class="prose dark:prose-invert max-w-none space-y-4">
-                    {!! $article->getExcerptText() !!}
-
-                    {{-- Attachment --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                        <div x-data="{ show: false, fileUrl: '', fileType: '', fileName: '' }" class="space-y-3">
-                            @foreach ($article->getAttachments() as $url)
-                            @php
-                            $filename = basename(parse_url($url, PHP_URL_PATH));
-                            $size = '';
-                            $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-                            try {
-                            if ($storage->exists('articles/' . $filename)) {
-                            $sizeBytes = $storage->size('articles/' . $filename);
-                            $size = round($sizeBytes / 1024 / 1024, 2) . ' MB';
-                            }
-                            } catch (\Throwable $e) {}
-                            @endphp
-                            <div
-                                class="p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow hover:shadow-md transition flex flex-col gap-3 items-start">
-                                <div class="flex items-center gap-3 w-full">
-                                    <!-- Icon file type -->
-                                    <div
-                                        class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-                                        @if(in_array($ext, ['pdf']))
-                                        <!-- Stylish PDF Icon -->
-                                        <svg class="w-8 h-8" viewBox="0 0 48 48" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <rect width="48" height="48" rx="12" fill="#F87171" />
-                                            <path d="M16 16H32V32H16V16Z" fill="#fff" />
-                                            <path d="M20 20H28V28H20V20Z" fill="#F87171" />
-                                            <text x="24" y="34" text-anchor="middle" font-size="10"
-                                                font-family="Arial, Helvetica, sans-serif" fill="#fff"
-                                                font-weight="bold">PDF</text>
-                                        </svg>
-                                        @else
-                                        <!-- Modern Document Icon -->
-                                        <svg class="w-8 h-8" viewBox="0 0 48 48" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <rect width="48" height="48" rx="12" fill="#CBD5E1" />
-                                            <path d="M16 16H32V32H16V16Z" fill="#fff" />
-                                            <path d="M20 20H28V28H20V20Z" fill="#60A5FA" />
-                                            <text x="24" y="34" text-anchor="middle" font-size="10"
-                                                font-family="Arial, Helvetica, sans-serif" fill="#2563eb"
-                                                font-weight="bold">DOC</text>
-                                        </svg>
-                                        @endif
-                                    </div>
-                                    <!-- File info -->
-                                    <div class="flex-grow min-w-0 max-w-full">
-                                        <div class="font-semibold text-gray-900 dark:text-gray-100 truncate">{{
-                                            $filename }}</div>
-                                        @if($size)
-                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $size }}</div>
-                                        @endif
-                                    </div>
-                                </div>
-                                <!-- Action buttons below -->
-                                <div class="flex gap-2 w-full mt-2 flex-col sm:flex-row">
-                                    <button type="button"
-                                        style="display:flex;align-items:center;gap:0.25rem;font-size:0.75rem;padding:0.25rem 0.9rem;border-radius:0.375rem;background:#22c55e;color:#fff;border:1px solid #22c55e;transition:all .2s;width:100%;max-width:140px;justify-content:center;"
-                                        onmouseover="this.style.background='#16a34a';this.style.color='#fff'"
-                                        onmouseout="this.style.background='#22c55e';this.style.color='#fff'"
-                                        @click="show = true; fileUrl = '{{ $url }}'; fileType = '{{ $ext }}'; fileName = '{{ $filename }}'">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        Preview
-                                    </button>
-                                    @can('download_articles')
-                                    <a href="{{ $url }}" target="_blank"
-                                        style="display:flex;align-items:center;gap:0.25rem;font-size:0.75rem;padding:0.25rem 0.9rem;border-radius:0.375rem;background:#2563eb;color:#fff;border:1px solid #2563eb;transition:all .2s;text-decoration:none;width:100%;max-width:140px;justify-content:center;"
-                                        onmouseover="this.style.background='#1d4ed8';this.style.color='#fff'"
-                                        onmouseout="this.style.background='#2563eb';this.style.color='#fff'">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
-                                        </svg>
-                                        Download
-                                    </a>
-                                    @endcan
-                                </div>
-                            </div>
-                            @endforeach
-
-                            <!-- Modal Preview File -->
-                            <div x-show="show" x-cloak
-                                class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                                <div
-                                    class="bg-white dark:bg-gray-900 rounded-xl shadow-lg max-w-2xl w-full p-6 pt-14 relative">
-                                    <div class="flex items-center justify-between mb-4 gap-2">
-                                        <div class="font-semibold text-lg text-gray-900 dark:text-gray-100 truncate"
-                                            x-text="fileName"></div>
-                                        <button @click="show = false"
-                                            class="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <template x-if="['jpg','jpeg','png','gif','webp','bmp'].includes(fileType)">
-                                        <img :src="fileUrl" alt="Preview" class="max-h-96 mx-auto rounded" />
-                                    </template>
-                                    <template x-if="['pdf'].includes(fileType)">
-                                        <iframe :src="fileUrl" class="w-full h-96 rounded" frameborder="0"></iframe>
-                                    </template>
-                                    <template x-if="['mp4','webm','ogg'].includes(fileType)">
-                                        <video :src="fileUrl" controls class="w-full max-h-96 rounded"></video>
-                                    </template>
-                                    <!-- CSV preview as text -->
-                                    <template x-if="['csv'].includes(fileType)">
-                                        <iframe :src="fileUrl" class="w-full h-96 rounded bg-white"
-                                            frameborder="0"></iframe>
-                                    </template>
-                                    <!-- Office files preview with Google Docs Viewer (hanya jika url http/https) -->
-                                    <template
-                                        x-if="['doc','docx','xls','xlsx','ppt','pptx'].includes(fileType) && (fileUrl.startsWith('http://') || fileUrl.startsWith('https://'))">
-                                        <iframe
-                                            :src="'https://docs.google.com/gview?url=' + encodeURIComponent(fileUrl) + '&embedded=true'"
-                                            class="w-full h-96 rounded bg-white" frameborder="0"></iframe>
-                                    </template>
-                                    @can('download_articles')
-                                    <template
-                                        x-if="['doc','docx','xls','xlsx','ppt','pptx'].includes(fileType) && !(fileUrl.startsWith('http://') || fileUrl.startsWith('https://'))">
-                                        <div class="text-gray-500 dark:text-gray-300 text-center py-8">
-                                            File Office hanya bisa dipreview jika file dapat diakses publik (URL
-                                            http/https).<br>
-                                            <a :href="fileUrl" target="_blank"
-                                                style="color:#2563eb;text-decoration:none;"
-                                                onmouseover="this.style.textDecoration='underline'"
-                                                onmouseout="this.style.textDecoration='none'">Download file</a>
-                                        </div>
-                                    </template>
-                                    @endcan
-                                    <template
-                                        x-if="!['jpg','jpeg','png','gif','webp','bmp','pdf','mp4','webm','ogg','csv','doc','docx','xls','xlsx','ppt','pptx'].includes(fileType)">
-                                        <div class="text-gray-500 dark:text-gray-300 text-center py-8">
-                                            Tidak dapat preview file ini.
-                                        </div>
-                                    </template>
-                                    @can('download_articles')
-                                    <div class="mt-6 text-center">
-                                        <a :href="fileUrl" target="_blank"
-                                            style="color:#2563eb;text-decoration:none;font-size:15px;"
-                                            onmouseover="this.style.textDecoration='underline'"
-                                            onmouseout="this.style.textDecoration='none'">Download file</a>
-                                    </div>
-                                    @endcan
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="prose dark:prose-invert max-w-none trix-content" id="excerptContent">
+                    {!! $article->excerpt !!}
                 </div>
-
 
                 {{-- Footer --}}
                 <div class="flex justify-between items-center mt-6">
@@ -262,5 +104,178 @@ $storage = Storage::disk($disk);
                 </div>
             </div>
         </div>
+
+        <!-- Modal Preview -->
+        <div id="modalPreview"
+            class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700"
+                style="height:80vh; min-height:400px; max-height:95vh;">
+                <div
+                    class="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b bg-gray-50 dark:bg-gray-800">
+                    <div id="modalTitle"
+                        class="font-semibold text-base md:text-lg text-gray-900 dark:text-gray-100 truncate"></div>
+                    <button onclick="closePreview()"
+                        class="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-black dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex-1 p-2 md:p-4 overflow-auto bg-gray-50 dark:bg-gray-900 flex flex-col">
+                    <div id="previewContent" class="flex-1 w-full h-full flex items-center justify-center"></div>
+                </div>
+                <div class="px-4 md:px-6 py-3 md:py-4 border-t bg-gray-50 dark:bg-gray-800 text-center">
+                    <a id="downloadLink" href="#" target="_blank" class="text-blue-600 hover:underline text-sm">
+                        Download file
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </x-filament::page>
+
+@push('scripts')
+<script>
+    function renderTrixAttachments() {
+        const figures = document.querySelectorAll("figure[data-trix-attachment]");
+
+        figures.forEach(fig => {
+            const data = JSON.parse(fig.dataset.trixAttachment);
+
+            const url = data.url || data.href;
+            const filename = data.filename || "Attachment";
+            const sizeKB = data.filesize
+                ? (data.filesize / 1024).toFixed(1) + " KB"
+                : "";
+
+            const ext = filename.split('.').pop().toLowerCase();
+
+            // Remove default spacing
+            fig.style.margin = "0";
+
+            // Build the custom card UI
+            fig.innerHTML = `
+                <div class="border rounded-xl p-4 bg-white dark:bg-gray-800 shadow-sm
+                            flex flex-col gap-3 w-full max-w-md mb-4">
+
+                    <div class="flex items-center gap-3 w-full">
+
+                        <div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+                            ${ext === "pdf" ? `
+                                <svg class="w-8 h-8" viewBox="0 0 48 48" fill="none">
+                                    <rect width="48" height="48" rx="12" fill="#F87171" />
+                                    <path d="M16 16H32V32H16V16Z" fill="#fff" />
+                                    <path d="M20 20H28V28H20V20Z" fill="#F87171" />
+                                    <text x="24" y="34" text-anchor="middle" font-size="10"
+                                        fill="#fff" font-weight="bold">PDF</text>
+                                </svg>
+                            ` : `
+                                <svg class="w-8 h-8" viewBox="0 0 48 48" fill="none">
+                                    <rect width="48" height="48" rx="12" fill="#CBD5E1" />
+                                    <path d="M16 16H32V32H16V16Z" fill="#fff" />
+                                    <path d="M20 20H28V28H20V20Z" fill="#60A5FA" />
+                                    <text x="24" y="34" text-anchor="middle" font-size="10"
+                                        fill="#2563eb" font-weight="bold">DOC</text>
+                                </svg>
+                            `}
+                        </div>
+
+                        <div class="flex-grow min-w-0 max-w-full">
+                            <div class="font-semibold text-gray-900 dark:text-gray-100 truncate">${filename}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${sizeKB} KB</div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3 mt-2">                        
+                        
+                        <!-- PREVIEW BUTTON -->
+                        <a href="javascript:void(0)"
+                            onclick="openPreview('${url}', '${filename}')"
+                            class="flex items-center justify-center gap-1 text-xs font-medium px-4 py-2 rounded-md w-full text-white"
+                            style="background:#22c55e; text-decoration:none;">
+                            <x-heroicon-o-eye class="w-4 h-4" />
+                            Preview
+                        </a>
+
+                        <!-- DOWNLOAD -->
+                        <a href="${url}" download="${filename}"
+                            class="flex items-center justify-center gap-1 text-xs font-medium px-4 py-2 rounded-md w-full text-white"
+                            style="background:#2563eb; text-decoration:none;"
+                            onmouseover="this.style.background='#1d4ed8'"
+                            onmouseout="this.style.background='#2563eb'">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"
+                                class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5" />
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M7.5 10.5l4.5 4.5 4.5-4.5M12 3v12" />
+                            </svg>
+
+                            Download
+                        </a>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // SPA events
+    document.addEventListener("livewire:navigated", () => setTimeout(renderTrixAttachments, 60));
+    document.addEventListener("DOMContentLoaded", () => setTimeout(renderTrixAttachments, 80));
+
+    function openPreview(url, title) {
+        document.getElementById("modalTitle").innerText = title;
+        const ext = title.split('.').pop().toLowerCase();
+        const previewContent = document.getElementById("previewContent");
+        let html = '';
+            if (["jpg","jpeg","png","gif","webp","bmp","svg"].includes(ext)) {
+                html = `<img src="${url}" alt="${title}" style="max-width:100%; max-height:65vh; border-radius:12px; box-shadow:0 2px 8px #0002; background:#fff;" />`;
+            } else if (["mp3","wav","ogg","aac","m4a"].includes(ext)) {
+                html = `<audio controls style="width:100%; max-width:600px;"><source src="${url}">Browser tidak mendukung audio.</audio>`;
+            } else if (["mp4","webm","ogg","mov","mkv"].includes(ext)) {
+                html = `<video controls style="max-width:100%; max-height:65vh; border-radius:12px; background:#000;"><source src="${url}">Browser tidak mendukung video.</video>`;
+            } else if (ext === "pdf") {
+                html = `<iframe src="${url}" frameborder="0" style="width:100%; height:70vh; min-height:300px; max-height:80vh; border-radius:12px; background:#fff;"></iframe>`;
+            } else {
+                // Google Docs Viewer for other docs (doc, docx, xls, xlsx, ppt, pptx, etc)
+                const gview = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+                html = `<iframe src="${gview}" frameborder="0" style="width:100%; height:70vh; min-height:300px; max-height:80vh; border-radius:12px; background:#fff;"></iframe>`;
+            }
+        previewContent.innerHTML = html;
+        document.getElementById("modalPreview").classList.remove("hidden");
+    }
+
+    function closePreview() {
+        document.getElementById("modalPreview").classList.add("hidden");
+        document.getElementById("previewContent").innerHTML = "";
+    }
+
+    function linkifyExcerpt() {
+        const excerptDiv = document.getElementById('excerptContent');
+        if (!excerptDiv) return;
+        // Hanya proses node text langsung di dalam excerptContent
+        excerptDiv.childNodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const urlRegex = /(https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%]+)|(www\.[\w\-._~:/?#[\]@!$&'()*+,;=%]+)/gi;
+                if (urlRegex.test(node.textContent)) {
+                    const html = node.textContent.replace(urlRegex, function(url) {
+                        let href = url;
+                        if (!href.match(/^https?:\/\//)) href = 'http://' + href;
+                        return `<a href='${href}' style='color:#2563eb;text-decoration:underline' target='_blank' rel='noopener'>${url}</a>`;
+                    });
+                    const span = document.createElement('span');
+                    span.innerHTML = html;
+                    excerptDiv.replaceChild(span, node);
+                }
+            }
+        });
+    }
+    
+    document.addEventListener("DOMContentLoaded", linkifyExcerpt);
+    document.addEventListener("livewire:navigated", () => setTimeout(linkifyExcerpt, 60));
+</script>
+@endpush
