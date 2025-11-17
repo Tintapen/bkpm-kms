@@ -286,21 +286,32 @@ $storage = Storage::disk($disk);
     function linkifyExcerpt() {
         const excerptDiv = document.getElementById('excerptContent');
         if (!excerptDiv) return;
-        // Hanya proses node text langsung di dalam excerptContent
-        excerptDiv.childNodes.forEach(node => {
+        const urlRegex = /(https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%]+)|(www\.[\w\-._~:/?#[\]@!$&'()*+,;=%]+)/gi;
+
+        function linkifyNode(node) {
             if (node.nodeType === Node.TEXT_NODE) {
-                const urlRegex = /(https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%]+)|(www\.[\w\-._~:/?#[\]@!$&'()*+,;=%]+)/gi;
                 if (urlRegex.test(node.textContent)) {
                     const html = node.textContent.replace(urlRegex, function(url) {
                         let href = url;
                         if (!href.match(/^https?:\/\//)) href = 'http://' + href;
-                        return `<a href='${href}' style='color:#2563eb;text-decoration:underline' target='_blank' rel='noopener'>${url}</a>`;
+                        return `<a href='${href}' style='text-decoration:underline' target='_blank' rel='noopener'>${url}</a>`;
                     });
                     const span = document.createElement('span');
                     span.innerHTML = html;
-                    excerptDiv.replaceChild(span, node);
+                    node.parentNode.replaceChild(span, node);
                 }
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                Array.from(node.childNodes).forEach(linkifyNode);
             }
+        }
+
+        linkifyNode(excerptDiv);
+
+        // Ensure all <a> tags inside excerptContent open in new tab and are blue/underlined inline
+        const allLinks = excerptDiv.querySelectorAll('a');
+        allLinks.forEach(link => {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener');
         });
     }
     
