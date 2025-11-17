@@ -7,6 +7,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Models\MailSetting;
+use Illuminate\Support\Facades\Log;
 
 class ArticleCreatedNotification extends Notification
 {
@@ -49,11 +51,28 @@ class ArticleCreatedNotification extends Notification
 
     public function toMail($notifiable)
     {
-        return (new MailMessage)
-            ->subject('Artikel Baru Diterbitkan')
-            ->greeting('Halo ' . $notifiable->name . '!')
-            ->line("Artikel baru telah diterbitkan: {$this->article->title}")
-            ->action('Lihat Artikel', route('filament.admin.resources.articles.view', $this->article->id))
-            ->line('Terima kasih telah menggunakan aplikasi kami!');
+        $mailSetting = MailSetting::first();
+
+        if (!$mailSetting || empty($mailSetting->host) || empty($mailSetting->from_address)) {
+            Log::error('[ArticleCreatedNotification] Gagal mengirim email: MailSetting belum dikonfigurasi.', [
+                'mail_setting' => $mailSetting
+            ]);
+            return null;
+        }
+
+        try {
+            return (new MailMessage)
+                ->subject('Artikel Baru Diterbitkan')
+                ->greeting('Halo ' . $notifiable->name . '!')
+                ->line("Artikel baru telah diterbitkan: {$this->article->title}")
+                ->action('Lihat Artikel', route('filament.admin.resources.articles.view', $this->article->id))
+                ->line('Terima kasih telah menggunakan aplikasi kami!');
+        } catch (\Throwable $e) {
+            Log::error('[ArticleCreatedNotification] Exception saat kirim email', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return null;
+        }
     }
 }
