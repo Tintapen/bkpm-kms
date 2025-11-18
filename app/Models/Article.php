@@ -515,7 +515,7 @@ class Article extends Model
                 }
             }
             // Fallback: cari semua nama file yang mirip di excerpt (untuk legacy)
-            if (preg_match_all('/([A-Za-z0-9 _\-\(\)]+\.(?:pdf|csv|xlsx|xls|docx|doc))/i', $excerpt, $nameMatches)) {
+            if (preg_match_all('/([A-Za-z0-9 _\-\(\)]+\.(?:pdf|csv|xlsx|xls|docx|doc|png|jpg|jpeg))/i', $excerpt, $nameMatches)) {
                 foreach ($nameMatches[1] as $basename) {
                     foreach ($storage->files('articles') as $f) {
                         if (basename($f) === $basename) {

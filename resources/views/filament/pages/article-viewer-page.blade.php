@@ -164,6 +164,44 @@ $storage = Storage::disk($disk);
             const downloadUrl = backendDownloadUrl || url;
 
             // Build the custom card UI
+            let iconHtml = '';
+            if (ext === "pdf") {
+                iconHtml = `<svg class="w-8 h-8" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="12" fill="#F87171" />
+                    <path d="M16 16H32V32H16V16Z" fill="#fff" />
+                    <path d="M20 20H28V28H20V20Z" fill="#F87171" />
+                    <text x="24" y="34" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">PDF</text>
+                </svg>`;
+            } else if (["xls","xlsx","csv"].includes(ext)) {
+                iconHtml = `<svg class="w-8 h-8" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="12" fill="#34D399" />
+                    <path d="M16 16H32V32H16V16Z" fill="#fff" />
+                    <path d="M20 20H28V28H20V20Z" fill="#34D399" />
+                    <text x="24" y="34" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">XLS</text>
+                </svg>`;
+            } else if (["jpg","jpeg","png"].includes(ext)) {
+                iconHtml = `<svg class="w-8 h-8" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="12" fill="#FBBF24" />
+                    <circle cx="24" cy="24" r="10" fill="#fff" />
+                    <circle cx="24" cy="24" r="6" fill="#FBBF24" />
+                    <text x="24" y="40" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">IMG</text>
+                </svg>`;
+            } else if (["ppt","pptx"].includes(ext)) {
+                iconHtml = `<svg class="w-8 h-8" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="12" fill="#F59E42" />
+                    <path d="M16 16H32V32H16V16Z" fill="#fff" />
+                    <path d="M20 20H28V28H20V20Z" fill="#F59E42" />
+                    <text x="24" y="34" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">PPT</text>
+                </svg>`;
+            } else {
+                iconHtml = `<svg class="w-8 h-8" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="12" fill="#CBD5E1" />
+                    <path d="M16 16H32V32H16V16Z" fill="#fff" />
+                    <path d="M20 20H28V28H20V20Z" fill="#60A5FA" />
+                    <text x="24" y="34" text-anchor="middle" font-size="10" fill="#2563eb" font-weight="bold">DOC</text>
+                </svg>`;
+            }
+
             fig.innerHTML = `
                 <div class="border rounded-xl p-4 bg-white dark:bg-gray-800 shadow-sm
                             flex flex-col gap-3 w-full max-w-md mb-4">
@@ -171,23 +209,7 @@ $storage = Storage::disk($disk);
                     <div class="flex items-center gap-3 w-full">
 
                         <div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-                            ${ext === "pdf" ? `
-                                <svg class="w-8 h-8" viewBox="0 0 48 48" fill="none">
-                                    <rect width="48" height="48" rx="12" fill="#F87171" />
-                                    <path d="M16 16H32V32H16V16Z" fill="#fff" />
-                                    <path d="M20 20H28V28H20V20Z" fill="#F87171" />
-                                    <text x="24" y="34" text-anchor="middle" font-size="10"
-                                        fill="#fff" font-weight="bold">PDF</text>
-                                </svg>
-                            ` : `
-                                <svg class="w-8 h-8" viewBox="0 0 48 48" fill="none">
-                                    <rect width="48" height="48" rx="12" fill="#CBD5E1" />
-                                    <path d="M16 16H32V32H16V16Z" fill="#fff" />
-                                    <path d="M20 20H28V28H20V20Z" fill="#60A5FA" />
-                                    <text x="24" y="34" text-anchor="middle" font-size="10"
-                                        fill="#2563eb" font-weight="bold">DOC</text>
-                                </svg>
-                            `}
+                            ${iconHtml}
                         </div>
 
                         <div class="flex-grow min-w-0 max-w-full">

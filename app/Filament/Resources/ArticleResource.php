@@ -62,7 +62,7 @@ class ArticleResource extends BaseResource
                     ->fileAttachmentsDisk('public')
                     ->fileAttachmentsVisibility('public')
                     ->saveUploadedFileAttachmentsUsing(function ($file) {
-                        // Allowed MIME types: pdf, csv, excel, word, powerpoint
+                        // Allowed MIME types: pdf, csv, excel, word, powerpoint, png, jpg
                         $allowed = [
                             'application/pdf',
                             'text/csv',
@@ -74,6 +74,8 @@ class ArticleResource extends BaseResource
                             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                             'application/vnd.ms-powerpoint',
                             'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                            'image/png',
+                            'image/jpeg',
                         ];
 
                         $mime = $file->getMimeType() ?: $file->getClientMimeType();
