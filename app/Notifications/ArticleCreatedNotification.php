@@ -24,10 +24,21 @@ class ArticleCreatedNotification extends Notification
     public function via($notifiable)
     {
         $channels = ['database', 'broadcast'];
-        // Only send mail if user wants email notification
-        if (isset($notifiable->emailnotif) && $notifiable->emailnotif === 'Y') {
+
+        $mailSetting = MailSetting::first();
+        // Only send mail if user wants email notification AND mail setting exists and host is set
+        if (
+            isset($notifiable->emailnotif) && $notifiable->emailnotif === 'Y' &&
+            $mailSetting && !empty($mailSetting->host)
+        ) {
             $channels[] = 'mail';
         }
+
+        Log::info('[ArticleCreatedNotification] via channels', [
+            'channels' => $channels,
+            'mailSettingExists' => (bool)$mailSetting,
+            'mailHost' => $mailSetting->host ?? null,
+        ]);
         return $channels;
     }
 
@@ -51,15 +62,6 @@ class ArticleCreatedNotification extends Notification
 
     public function toMail($notifiable)
     {
-        $mailSetting = MailSetting::first();
-
-        if (!$mailSetting || empty($mailSetting->host) || empty($mailSetting->from_address)) {
-            Log::error('[ArticleCreatedNotification] Gagal mengirim email: MailSetting belum dikonfigurasi.', [
-                'mail_setting' => $mailSetting
-            ]);
-            return null;
-        }
-
         try {
             return (new MailMessage)
                 ->subject('Artikel Baru Diterbitkan')

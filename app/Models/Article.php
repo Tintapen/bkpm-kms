@@ -340,11 +340,8 @@ class Article extends Model
             ));
 
             if (empty($tmpFiles)) {
-                Log::info("Tidak ada TMP file ditemukan.");
                 return;
             }
-
-            Log::info("TMP FILES DITEMUKAN:", $tmpFiles);
 
             foreach ($tmpFiles as $tmpFileName) {
 
@@ -352,12 +349,6 @@ class Article extends Model
 
                 // PASTIKAN FILE ADA
                 if (!$storage->exists($tmpRelative)) {
-
-                    // DEBUG: list semua file di tmp untuk membandingkan
-                    Log::warning("TMP TIDAK ADA: $tmpRelative", [
-                        'available_tmp_files' => $storage->files('articles/tmp')
-                    ]);
-
                     continue;
                 }
 
@@ -387,17 +378,7 @@ class Article extends Model
                         $storage->put($finalRelative, $content);
                         $storage->delete($tmpRelative);
                     }
-
-                    Log::info("TMP → FINAL OK", [
-                        'tmp'   => $tmpRelative,
-                        'final' => $finalRelative,
-                    ]);
                 } catch (\Throwable $e) {
-                    Log::error("GAGAL MEMINDAHKAN FILE TMP", [
-                        'tmp'   => $tmpRelative,
-                        'final' => $finalRelative,
-                        'error' => $e->getMessage()
-                    ]);
                     continue;
                 }
 
