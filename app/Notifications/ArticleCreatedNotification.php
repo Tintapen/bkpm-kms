@@ -34,11 +34,6 @@ class ArticleCreatedNotification extends Notification
             $channels[] = 'mail';
         }
 
-        Log::info('[ArticleCreatedNotification] via channels', [
-            'channels' => $channels,
-            'mailSettingExists' => (bool)$mailSetting,
-            'mailHost' => $mailSetting->host ?? null,
-        ]);
         return $channels;
     }
 

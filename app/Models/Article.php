@@ -10,6 +10,7 @@ use App\Notifications\ArticleCreatedNotification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Log\Logger;
 
 class Article extends Model
 {
@@ -371,50 +372,73 @@ class Article extends Model
 
                     // Native rename (lebih cepat)
                     $moved = @rename($tmpFull, $finalFull);
-
                     if (!$moved) {
                         // fallback copy
                         $content = $storage->get($tmpRelative);
                         $storage->put($finalRelative, $content);
                         $storage->delete($tmpRelative);
                     }
+
+                    // Setelah file dipindah, update $newUrl
+                    $newUrl = $storage->url($finalRelative);
+                    // Clean up double prefix: if $newUrl already contains http(s), do not prepend /storage/
+                    // If $newUrl contains /storage/http, remove the /storage/ before http
+                    if (preg_match('#/storage/(https?://)#', $newUrl)) {
+                        $newUrl = preg_replace('#/storage/(https?://)#', '$1', $newUrl);
+                    }
+                    // If $newUrl does not start with http(s), ensure it starts with /storage/ only once
+                    elseif (!preg_match('/^https?:\/\//', $newUrl)) {
+                        $newUrl = '/storage/' . ltrim(preg_replace('/^(\/storage\/)+/', '', $newUrl), '/');
+                    }
+
+                    Log::info("Article Model: Moved tmp file '$tmpRelative' to '$finalRelative', new URL: $newUrl");
+                    // Only replace if still in tmp path (avoid double prefix)
+                    $oldPatterns = [
+                        // Only match if not already replaced
+                        '/(["\'\(\s=])articles\/tmp\/' . preg_quote($tmpFileName, '/') . '/',
+                        '/(["\'\(\s=])\/storage\/articles\/tmp\/' . preg_quote($tmpFileName, '/') . '/',
+                        // Absolute URL to tmp
+                        '/(["\'\(\s=])' . preg_quote(url("/storage/articles/tmp/$tmpFileName"), '/') . '/',
+                    ];
+                    foreach ($oldPatterns as $pattern) {
+                        $newExcerpt = preg_replace($pattern, '$1' . $newUrl, $newExcerpt);
+                    }
+
+                    // Robust: parse all data-trix-attachment JSON, update url/href if contains articles/tmp/$tmpFileName, re-encode and replace in excerpt
+                    $newFileName = basename($finalRelative);
+                    $newExcerpt = preg_replace_callback(
+                        '/data-trix-attachment="([^"]+)"/i',
+                        function($m) use ($tmpFileName, $newFileName, $newUrl) {
+                            $json = html_entity_decode($m[1]);
+                            $data = json_decode($json, true);
+                            if (!is_array($data)) return $m[0];
+                            $changed = false;
+                            // filename
+                            if (!empty($data['filename']) && $data['filename'] === $tmpFileName) {
+                                $data['filename'] = $newFileName;
+                                $changed = true;
+                            }
+                            // url
+                            if (!empty($data['url']) && strpos($data['url'], 'articles/tmp/' . $tmpFileName) !== false) {
+                                $data['url'] = $newUrl;
+                                $changed = true;
+                            }
+                            // href
+                            if (!empty($data['href']) && strpos($data['href'], 'articles/tmp/' . $tmpFileName) !== false) {
+                                $data['href'] = $newUrl;
+                                $changed = true;
+                            }
+                            if ($changed) {
+                                $newJson = htmlspecialchars(json_encode($data), ENT_QUOTES, 'UTF-8');
+                                return 'data-trix-attachment="' . $newJson . '"';
+                            }
+                            return $m[0];
+                        },
+                        $newExcerpt
+                    );
                 } catch (\Throwable $e) {
                     continue;
                 }
-
-                $newUrl = $storage->url($finalRelative);
-
-                $oldPatterns = [
-                    "articles/tmp/$tmpFileName",
-                    "/storage/articles/tmp/$tmpFileName",
-                    url("/storage/articles/tmp/$tmpFileName"),
-                ];
-
-                foreach ($oldPatterns as $old) {
-                    if (!empty($old)) {
-                        $newExcerpt = str_replace($old, $newUrl, $newExcerpt);
-                    }
-                }
-
-                // Update juga filename, url, dan href di data-trix-attachment JSON
-                $newFileName = basename($finalRelative);
-                // Ganti "filename":"$tmpFileName" menjadi nama file baru
-                $newExcerpt = preg_replace(
-                    '/("filename"\s*:\s*")' . preg_quote($tmpFileName, '/') . '(")/i',
-                    '$1' . $newFileName . '$2',
-                    $newExcerpt
-                );
-                // Ganti "url":"...tmp..." dan "href":"...tmp..." menjadi $newUrl
-                $newExcerpt = preg_replace(
-                    '/("url"\s*:\s*")([^"\n]*' . preg_quote($tmpFileName, '/') . ')(")/i',
-                    '$1' . $newUrl . '$3',
-                    $newExcerpt
-                );
-                $newExcerpt = preg_replace(
-                    '/("href"\s*:\s*")([^"\n]*' . preg_quote($tmpFileName, '/') . ')(")/i',
-                    '$1' . $newUrl . '$3',
-                    $newExcerpt
-                );
             }
 
             $model->excerpt = $newExcerpt;
@@ -424,16 +448,47 @@ class Article extends Model
             $storage = Storage::disk('public');
             $excerpt = $model->excerpt ?? '';
 
-            // tangkap semua URL di Trix JSON attachment
+            // Kumpulkan semua file yang terhubung dari data-trix-attachment JSON
+            $filePaths = [];
+            if (preg_match_all('/data-trix-attachment="([^"]+)"/i', $excerpt, $matches)) {
+                foreach ($matches[1] as $jsonHtml) {
+                    $data = json_decode(html_entity_decode($jsonHtml), true);
+                    if (!is_array($data)) continue;
+                    // Cek url dan href
+                    foreach (['url', 'href'] as $field) {
+                        if (!empty($data[$field])) {
+                            // Ambil path relatif jika mengandung /storage/articles/
+                            if (preg_match('#/storage/articles/([^"\?\s]+)#', $data[$field], $m)) {
+                                $filePaths[] = 'articles/' . ltrim($m[1], '/');
+                            }
+                        }
+                    }
+                    // Cek filename
+                    if (!empty($data['filename'])) {
+                        // Cari file di storage/articles/ yang namanya mirip
+                        $basename = $data['filename'];
+                        foreach ($storage->files('articles') as $f) {
+                            if (basename($f) === $basename) {
+                                $filePaths[] = $f;
+                            }
+                        }
+                    }
+                }
+            }
+            // Fallback: cari semua nama file yang mirip di excerpt (untuk legacy)
             if (preg_match_all('/([A-Za-z0-9 _\-\(\)]+\.(?:pdf|csv|xlsx|xls|docx|doc))/i', $excerpt, $nameMatches)) {
                 foreach ($nameMatches[1] as $basename) {
-                    $url = $storage->url('articles/' . $basename);
-                    $parsed = parse_url($url, PHP_URL_PATH);
-                    $relativePath = ltrim(str_replace('/storage/', '', $parsed), '/');
-
-                    if ($storage->exists($relativePath)) {
-                        $storage->delete($relativePath);
+                    foreach ($storage->files('articles') as $f) {
+                        if (basename($f) === $basename) {
+                            $filePaths[] = $f;
+                        }
                     }
+                }
+            }
+            // Hapus semua file unik
+            foreach (array_unique($filePaths) as $relativePath) {
+                if ($storage->exists($relativePath)) {
+                    $storage->delete($relativePath);
                 }
             }
         });

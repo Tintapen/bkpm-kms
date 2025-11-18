@@ -149,7 +149,6 @@ $storage = Storage::disk($disk);
 
         figures.forEach(fig => {
             const data = JSON.parse(fig.dataset.trixAttachment);
-
             const url = data.url || data.href;
             const filename = data.filename || "Attachment";
             const sizeKB = data.filesize
@@ -200,13 +199,13 @@ $storage = Storage::disk($disk);
                     <div class="flex flex-col sm:flex-row gap-3 mt-2">                        
                         
                         <!-- PREVIEW BUTTON -->
-                        <a href="javascript:void(0)"
+                        <button type="button"
                             onclick="openPreview('${downloadUrl}', '${filename}')"
                             class="flex items-center justify-center gap-1 text-xs font-medium px-4 py-2 rounded-md w-full text-white"
                             style="background:#22c55e; text-decoration:none;">
                             <x-heroicon-o-eye class="w-4 h-4" />
                             Preview
-                        </a>
+                        </button>
 
                         <!-- DOWNLOAD -->
                         <a href="${downloadUrl}" download="${filename}"
