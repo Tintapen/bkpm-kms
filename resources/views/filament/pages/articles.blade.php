@@ -56,12 +56,13 @@ use App\Filament\Resources\ArticleResource;
                         {{-- Download --}}
                         @can('download_articles')
                         @php
-                        $attachments = $article->getAttachments();
+                        $firstUrl = $article->getFirstAttachmentUrl();
+                        $downloadFilename = $firstUrl ? basename(parse_url($firstUrl, PHP_URL_PATH)) : null;
                         @endphp
-                        @if(count($attachments) === 1 && $article->getFirstAttachmentUrl())
+                        @if($firstUrl && $downloadFilename)
                         <x-filament::icon-button icon="heroicon-o-arrow-down-tray" tag="a" title="Download Dokumen"
-                            href="{{ $article->getFirstAttachmentUrl() }}" target="_blank" rel="noopener noreferrer"
-                            color="success" />
+                            href="{{ url('/download/attachment/' . urlencode($downloadFilename)) }}" target="_blank"
+                            rel="noopener noreferrer" color="success" />
                         @endif
                         @endcan
 
