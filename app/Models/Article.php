@@ -344,11 +344,9 @@ class Article extends Model
                 return;
             }
 
+
             foreach ($tmpFiles as $tmpFileName) {
-
                 $tmpRelative = "articles/tmp/" . $tmpFileName;
-
-                // PASTIKAN FILE ADA
                 if (!$storage->exists($tmpRelative)) {
                     continue;
                 }
@@ -356,74 +354,73 @@ class Article extends Model
                 $ext = pathinfo($tmpFileName, PATHINFO_EXTENSION);
                 $base = pathinfo($tmpFileName, PATHINFO_FILENAME);
 
+                // Cari original filename dari data-trix-attachment JSON
+                $originalName = null;
+                if (preg_match_all('/data-trix-attachment="([^"]+)"/i', $excerpt, $jsonMatches)) {
+                    foreach ($jsonMatches[1] as $jsonHtml) {
+                        $data = json_decode(html_entity_decode($jsonHtml), true);
+                        if (is_array($data) && !empty($data['filename']) && ($data['filename'] === $tmpFileName || $data['filename'] === $base . '.' . $ext)) {
+                            $originalName = $data['filename'];
+                            break;
+                        }
+                    }
+                }
+                // Gunakan slug dari original filename jika ada, jika tidak pakai base
+                // Slugify: ganti +, spasi, dan karakter khusus lain ke strip, hapus karakter aneh
+                $slugSource = $originalName ? pathinfo($originalName, PATHINFO_FILENAME) : $base;
+                $slug = preg_replace('/[^a-z0-9\-]+/i', '-', str_replace(['+', ' '], '-', $slugSource));
+                $slug = trim(preg_replace('/-+/', '-', $slug), '-');
                 $date = now()->format('Ymd_His');
-                $finalRelative = "articles/{$base}_{$date}." . $ext;
-
-                // jika bentrok → increment
+                $finalRelative = "articles/{$slug}_{$date}." . $ext;
                 $i = 1;
                 while ($storage->exists($finalRelative)) {
-                    $finalRelative = "articles/{$base}_{$date}_{$i}." . $ext;
+                    $finalRelative = "articles/{$slug}_{$date}_{$i}." . $ext;
                     $i++;
                 }
 
                 try {
                     $tmpFull = $storage->path($tmpRelative);
                     $finalFull = $storage->path($finalRelative);
-
-                    // Native rename (lebih cepat)
                     $moved = @rename($tmpFull, $finalFull);
                     if (!$moved) {
-                        // fallback copy
                         $content = $storage->get($tmpRelative);
                         $storage->put($finalRelative, $content);
                         $storage->delete($tmpRelative);
                     }
 
-                    // Setelah file dipindah, update $newUrl
                     $newUrl = $storage->url($finalRelative);
-                    // Clean up double prefix: if $newUrl already contains http(s), do not prepend /storage/
-                    // If $newUrl contains /storage/http, remove the /storage/ before http
                     if (preg_match('#/storage/(https?://)#', $newUrl)) {
                         $newUrl = preg_replace('#/storage/(https?://)#', '$1', $newUrl);
-                    }
-                    // If $newUrl does not start with http(s), ensure it starts with /storage/ only once
-                    elseif (!preg_match('/^https?:\/\//', $newUrl)) {
+                    } elseif (!preg_match('/^https?:\/\//', $newUrl)) {
                         $newUrl = '/storage/' . ltrim(preg_replace('/^(\/storage\/)+/', '', $newUrl), '/');
                     }
 
                     Log::info("Article Model: Moved tmp file '$tmpRelative' to '$finalRelative', new URL: $newUrl");
-                    // Only replace if still in tmp path (avoid double prefix)
                     $oldPatterns = [
-                        // Only match if not already replaced
                         '/(["\'\(\s=])articles\/tmp\/' . preg_quote($tmpFileName, '/') . '/',
                         '/(["\'\(\s=])\/storage\/articles\/tmp\/' . preg_quote($tmpFileName, '/') . '/',
-                        // Absolute URL to tmp
                         '/(["\'\(\s=])' . preg_quote(url("/storage/articles/tmp/$tmpFileName"), '/') . '/',
                     ];
                     foreach ($oldPatterns as $pattern) {
                         $newExcerpt = preg_replace($pattern, '$1' . $newUrl, $newExcerpt);
                     }
 
-                    // Robust: parse all data-trix-attachment JSON, update url/href if contains articles/tmp/$tmpFileName, re-encode and replace in excerpt
                     $newFileName = basename($finalRelative);
                     $newExcerpt = preg_replace_callback(
                         '/data-trix-attachment="([^"]+)"/i',
-                        function($m) use ($tmpFileName, $newFileName, $newUrl) {
+                        function ($m) use ($tmpFileName, $newFileName, $newUrl) {
                             $json = html_entity_decode($m[1]);
                             $data = json_decode($json, true);
                             if (!is_array($data)) return $m[0];
                             $changed = false;
-                            // filename
                             if (!empty($data['filename']) && $data['filename'] === $tmpFileName) {
                                 $data['filename'] = $newFileName;
                                 $changed = true;
                             }
-                            // url
                             if (!empty($data['url']) && strpos($data['url'], 'articles/tmp/' . $tmpFileName) !== false) {
                                 $data['url'] = $newUrl;
                                 $changed = true;
                             }
-                            // href
                             if (!empty($data['href']) && strpos($data['href'], 'articles/tmp/' . $tmpFileName) !== false) {
                                 $data['href'] = $newUrl;
                                 $changed = true;
@@ -442,6 +439,48 @@ class Article extends Model
             }
 
             $model->excerpt = $newExcerpt;
+        });
+
+        static::updating(function (Article $model) {
+            // Hapus file attachment yang dihapus dari excerpt saat update
+            $disk = $model->attachment_disk ?? 'public';
+            $storage = Storage::disk($disk);
+            $oldExcerpt = $model->getOriginal('excerpt') ?? '';
+            $newExcerpt = $model->excerpt ?? '';
+
+            // Helper: ambil semua file path dari excerpt
+            $extractFiles = function ($excerpt) use ($storage) {
+                $paths = [];
+                if (preg_match_all('/data-trix-attachment="([^"]+)"/i', $excerpt, $matches)) {
+                    foreach ($matches[1] as $jsonHtml) {
+                        $data = json_decode(html_entity_decode($jsonHtml), true);
+                        if (!is_array($data)) continue;
+                        foreach (['url', 'href'] as $field) {
+                            if (!empty($data[$field]) && preg_match('#/storage/articles/([^"\?\s]+)#', $data[$field], $m)) {
+                                $paths[] = 'articles/' . ltrim($m[1], '/');
+                            }
+                        }
+                        if (!empty($data['filename'])) {
+                            $basename = $data['filename'];
+                            foreach ($storage->files('articles') as $f) {
+                                if (basename($f) === $basename) {
+                                    $paths[] = $f;
+                                }
+                            }
+                        }
+                    }
+                }
+                return array_unique($paths);
+            };
+
+            $oldFiles = $extractFiles($oldExcerpt);
+            $newFiles = $extractFiles($newExcerpt);
+            $deletedFiles = array_diff($oldFiles, $newFiles);
+            foreach ($deletedFiles as $file) {
+                if ($storage->exists($file)) {
+                    $storage->delete($file);
+                }
+            }
         });
 
         static::deleting(function (Article $model) {
