@@ -150,7 +150,21 @@ $storage = Storage::disk($disk);
         figures.forEach(fig => {
             const data = JSON.parse(fig.dataset.trixAttachment);
             const url = data.url || data.href;
-            const filename = data.filename || "Attachment";
+            // Ambil nama file untuk download dari URL storage (hasil rename/slugify), bukan dari data.filename
+            let filename = "Attachment";
+            let storageUrl = data.url || data.href || "";
+            if (storageUrl) {
+                // Ambil basename dari url (setelah /storage/articles/)
+                const match = storageUrl.match(/\/storage\/articles\/([^\/?#]+)/i);
+                if (match && match[1]) {
+                    filename = match[1];
+                } else {
+                    // fallback: ambil setelah last /
+                    filename = storageUrl.split('/').pop();
+                }
+            } else if (data.filename) {
+                filename = data.filename;
+            }
             const sizeKB = data.filesize
                 ? (data.filesize / 1024).toFixed(1) + " KB"
                 : "";
@@ -160,9 +174,16 @@ $storage = Storage::disk($disk);
             // Remove default spacing
             fig.style.margin = "0";
 
-            // Gunakan backendDownloadUrl jika ada, jika tidak fallback ke url lama
-            const downloadUrl = backendDownloadUrl || url;
 
+            // Untuk SEMUA file, gunakan route backend agar force download (kompatibel semua browser)
+            let downloadUrl = backendDownloadUrl || url;
+            if (filename) {
+                // Ambil hanya nama file (tanpa path) untuk route download
+                const fname = filename.split('/').pop();
+                downloadUrl = `/download/attachment/${encodeURIComponent(fname)}`;
+            }
+
+            console.log('Attachment:', filename, 'Download URL:', downloadUrl);
             // Build the custom card UI
             let iconHtml = '';
             if (ext === "pdf") {
