@@ -183,7 +183,6 @@ $storage = Storage::disk($disk);
                 downloadUrl = `/download/attachment/${encodeURIComponent(fname)}`;
             }
 
-            console.log('Attachment:', filename, 'Download URL:', downloadUrl);
             // Build the custom card UI
             let iconHtml = '';
             if (ext === "pdf") {
