@@ -222,54 +222,68 @@ $storage = Storage::disk($disk);
                 </svg>`;
             }
 
-            fig.innerHTML = `
-                <div class="border rounded-xl p-4 bg-white dark:bg-gray-800 shadow-sm
-                            flex flex-col gap-3 w-full max-w-md mb-4">
+            let isImage = ["jpg","jpeg","png","gif","webp","bmp","svg"].includes(ext);
 
-                    <div class="flex items-center gap-3 w-full">
-
-                        <div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-                            ${iconHtml}
+            if (isImage) {
+                // Gambar: tampilkan gambar ukuran asli, tanpa info header, gunakan full width
+                fig.innerHTML = `
+                    <div class="border rounded-xl p-4 bg-white dark:bg-gray-800 shadow-sm flex flex-col gap-3 w-full mb-4">
+                        <div class="flex justify-center my-2">
+                            <img src="${url}" alt="${filename}" style="max-width:100%; height:auto; border-radius:12px; box-shadow:0 2px 8px #0002; background:#fff;" />
                         </div>
-
-                        <div class="flex-grow min-w-0 max-w-full">
-                            <div class="font-semibold text-gray-900 dark:text-gray-100 truncate">${filename}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${sizeKB} KB</div>
+                        <div class="flex flex-col sm:flex-row gap-3 mt-2">
+                            <a href="${downloadUrl}" download="${filename}"
+                                class="flex items-center justify-center gap-1 text-xs font-medium px-4 py-2 rounded-md w-full text-white"
+                                style="background:#2563eb; text-decoration:none;"
+                                onmouseover="this.style.background='#1d4ed8'"
+                                onmouseout="this.style.background='#2563eb'">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 10.5l4.5 4.5 4.5-4.5M12 3v12" />
+                                </svg>
+                                Unduh
+                            </a>
                         </div>
                     </div>
-
-                    <div class="flex flex-col sm:flex-row gap-3 mt-2">                        
-                        
-                        <!-- PREVIEW BUTTON -->
-                        <button type="button"
-                            onclick="openPreview('${downloadUrl}', '${filename}')"
-                            class="flex items-center justify-center gap-1 text-xs font-medium px-4 py-2 rounded-md w-full text-white"
-                            style="background:#22c55e; text-decoration:none;">
-                            <x-heroicon-o-eye class="w-4 h-4" />
-                            Preview
-                        </button>
-
-                        <!-- DOWNLOAD -->
-                        <a href="${downloadUrl}" download="${filename}"
-                            class="flex items-center justify-center gap-1 text-xs font-medium px-4 py-2 rounded-md w-full text-white"
-                            style="background:#2563eb; text-decoration:none;"
-                            onmouseover="this.style.background='#1d4ed8'"
-                            onmouseout="this.style.background='#2563eb'">
-
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"
-                                class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5" />
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M7.5 10.5l4.5 4.5 4.5-4.5M12 3v12" />
-                            </svg>
-
-                            Download
-                        </a>
+                `;
+            } else {
+                // File lain: tombol preview dan download
+                fig.innerHTML = `
+                    <div class="border rounded-xl p-4 bg-white dark:bg-gray-800 shadow-sm flex flex-col gap-3 w-full max-w-md mb-4">
+                        <div class="flex items-center gap-3 w-full">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+                                ${iconHtml}
+                            </div>
+                            <div class="flex-grow min-w-0 max-w-full">
+                                <div class="font-semibold text-gray-900 dark:text-gray-100 truncate">${filename}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${sizeKB} KB</div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 mt-2">
+                            <!-- PREVIEW BUTTON -->
+                            <button type="button"
+                                onclick="openPreview('${url}', '${filename}')"
+                                class="flex items-center justify-center gap-1 text-xs font-medium px-4 py-2 rounded-md w-full text-white"
+                                style="background:#22c55e; text-decoration:none;">
+                                <x-heroicon-o-eye class="w-4 h-4" />
+                                Lihat
+                            </button>
+                            <!-- DOWNLOAD -->
+                            <a href="${downloadUrl}" download="${filename}"
+                                class="flex items-center justify-center gap-1 text-xs font-medium px-4 py-2 rounded-md w-full text-white"
+                                style="background:#2563eb; text-decoration:none;"
+                                onmouseover="this.style.background='#1d4ed8'"
+                                onmouseout="this.style.background='#2563eb'">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 10.5l4.5 4.5 4.5-4.5M12 3v12" />
+                                </svg>
+                                Unduh
+                            </a>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
         });
     }
 
