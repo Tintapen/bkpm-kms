@@ -85,6 +85,14 @@ class AdminPanelProvider extends PanelProvider
             --filament-dark-bg: #111828;
             --filament-light-bg: #ffffff;
             --filament-body-bg: #F9FAFB;
+            --custom-topbar-bg: #183776;
+            --custom-sidebar-header-bg: #183776;
+            --custom-topbar-input-bg: #20488e;
+            --custom-topbar-input-text: #fff;
+            --custom-topbar-input-placeholder: #e0e7ef;
+            --custom-topbar-input-border: #20488e;
+            --custom-topbar-icon: #fff;
+            --custom-topbar-icon-hover: #e0e7ef;
         }
 
         body {
@@ -101,6 +109,86 @@ class AdminPanelProvider extends PanelProvider
             font-size: 1.6rem !important;
             width: 2.1rem !important;
             height: 2.1rem !important;
+        }
+        /* Custom topbar and sidebar header color */
+        .fi-topbar, .custom-topbar, .fi-sidebar-header, .custom-sidebar-header {
+            background-color: var(--custom-topbar-bg) !important;
+            color: #fff !important;
+        }
+        .fi-sidebar-header, .custom-sidebar-header {
+            background-color: var(--custom-sidebar-header-bg) !important;
+            color: #fff !important;
+        }
+        .fi-sidebar-header .fi-sidebar-header-title, .fi-sidebar-header .fi-sidebar-header-title *,
+        .fi-topbar .fi-topbar-heading, .fi-topbar .fi-topbar-heading *,
+        .fi-topbar .fi-brand, .fi-topbar .fi-brand *,
+        .fi-topbar .brand, .fi-topbar .brand *,
+        .fi-logo, .fi-logo * {
+            color: #fff !important;
+            font-weight: bold !important;
+        }
+        .fi-topbar nav, .fi-topbar .bg-white {
+            background-color: transparent !important;
+        }
+        /* Topbar search input custom style */
+        .fi-topbar input[type="text"],
+        .fi-topbar input[type="search"] {
+            background: var(--custom-topbar-input-bg) !important;
+            color: var(--custom-topbar-input-text) !important;
+            border-color: var(--custom-topbar-input-border) !important;
+        }
+        .fi-topbar input[type="text"]::placeholder,
+        .fi-topbar input[type="search"]::placeholder {
+            color: var(--custom-topbar-input-placeholder) !important;
+            opacity: 1 !important;
+        }
+        .fi-topbar input[type="text"]:focus,
+        .fi-topbar input[type="search"]:focus {
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 2px #2563eb33 !important;
+        }
+        /* Sidebar collapse/expand button color */
+        .fi-topbar .fi-icon-btn,
+        .fi-topbar .fi-icon-btn .fi-icon-btn-icon,
+        .fi-topbar .fi-icon-btn svg {
+            color: var(--custom-topbar-icon) !important;
+            fill: var(--custom-topbar-icon) !important;
+            stroke: var(--custom-topbar-icon) !important;
+        }
+        .fi-topbar .fi-icon-btn:hover,
+        .fi-topbar .fi-icon-btn:focus {
+            color: var(--custom-topbar-icon-hover) !important;
+            fill: var(--custom-topbar-icon-hover) !important;
+            stroke: var(--custom-topbar-icon-hover) !important;
+        }
+        .fi-topbar .fi-icon-btn .fi-icon-btn-icon,
+        .fi-topbar .fi-icon-btn svg path {
+            color: var(--custom-topbar-icon) !important;
+            fill: var(--custom-topbar-icon) !important;
+            stroke: var(--custom-topbar-icon) !important;
+        }
+        .fi-topbar .fi-icon-btn:hover .fi-icon-btn-icon,
+        .fi-topbar .fi-icon-btn:focus .fi-icon-btn-icon,
+        .fi-topbar .fi-icon-btn:hover svg path,
+        .fi-topbar .fi-icon-btn:focus svg path {
+            color: var(--custom-topbar-icon-hover) !important;
+            fill: var(--custom-topbar-icon-hover) !important;
+            stroke: var(--custom-topbar-icon-hover) !important;
+        }
+        /* Notification bell icon in topbar */
+        .fi-topbar button > svg,
+        .fi-topbar button > svg path {
+            color: var(--custom-topbar-icon) !important;
+            fill: var(--custom-topbar-icon) !important;
+            stroke: var(--custom-topbar-icon) !important;
+        }
+        .fi-topbar button:hover > svg,
+        .fi-topbar button:focus > svg,
+        .fi-topbar button:hover > svg path,
+        .fi-topbar button:focus > svg path {
+            color: var(--custom-topbar-icon-hover) !important;
+            fill: var(--custom-topbar-icon-hover) !important;
+            stroke: var(--custom-topbar-icon-hover) !important;
         }
         .dark .fi-topbar,
         .dark .fi-header {
