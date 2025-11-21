@@ -48,7 +48,7 @@ use App\Filament\Resources\ArticleResource;
                                     bg-primary-50 dark:bg-primary-900/20
                                     text-primary-700 dark:text-primary-400
                                     border-primary-200 dark:border-primary-800 shadow-sm">
-                        <x-filament::icon icon="heroicon-m-rectangle-stack" class="w-4 h-4 text-primary-500" />
+                        <x-filament::icon icon="heroicon-m-rectangle-stack" class="w-4 h-4" style="color: #2E66DB;" />
                         {{ $article->category->name ?? $article->category }}
                     </span>
 
@@ -101,7 +101,7 @@ use App\Filament\Resources\ArticleResource;
                                 bg-primary-50 dark:bg-primary-900/20
                                 text-primary-700 dark:text-primary-300
                                 border-primary-200 dark:border-primary-800 transition">
-                        <x-filament::icon icon="heroicon-m-tag" class="w-4 h-4 text-primary-500" />
+                        <x-filament::icon icon="heroicon-m-tag" class="w-4 h-4" style="color: #2E66DB;" />
                         {{ $tag }}
                     </span>
                     @endforeach

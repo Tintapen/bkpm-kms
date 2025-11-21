@@ -132,7 +132,8 @@ use App\Filament\Resources\ArticleResource;
                         <div class="flex items-center mt-2">
                             <span
                                 class="inline-flex items-center gap-1 border rounded-md text-xs px-2 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 border-primary-200 dark:border-primary-800 shadow-sm">
-                                <x-filament::icon icon="heroicon-m-rectangle-stack" class="w-4 h-4 text-primary-500" />
+                                <x-filament::icon icon="heroicon-m-rectangle-stack" class="w-4 h-4"
+                                    style="color: #2E66DB;" />
                                 {{ $article->category->name }}
                             </span>
                         </div>
