@@ -53,22 +53,62 @@ class Sidebar extends Component
             if ($article && $article->category) {
                 $category = $article->category;
                 $openIds = [];
-                // Loop ke atas, masukkan semua parent id ke $openIds
+
                 while ($category) {
                     $openIds[] = $category->id;
                     $category = $category->parent;
                 }
-                // Urutkan dari root ke leaf
-                $openIds = array_reverse($openIds);
-                $this->open = array_unique(array_merge($this->open, $openIds));
+
+                $this->open = array_unique(array_merge($this->open, array_reverse($openIds)));
+                $this->selectedCategoryId = $article->category->id;
             }
         }
 
-        return view('livewire.sidebar', compact('categories'));
+        // --- Jika redirect ke /admin/articles?search=Kategori ---
+        $searchCategory = request()->query('search');
+        if ($searchCategory) {
+            $category = Category::where('name', $searchCategory)->first();
+
+            if ($category) {
+                $this->selectedCategoryId = $category->id;
+
+                // buka semua parent
+                $openIds = [];
+                $parent = $category;
+                while ($parent) {
+                    $openIds[] = $parent->id;
+                    $parent = $parent->parent;
+                }
+
+                $this->open = array_unique(array_merge($this->open, array_reverse($openIds)));
+            }
+        }
+
+        $leafCategories = $this->getLeafCategories($categories);
+
+        return view('livewire.sidebar', [
+            'categories' => $categories,
+            'leafCategories' => $leafCategories,
+        ]);
     }
 
     public function redirectToCategory($slug)
     {
         return redirect()->to('/admin/articles?search=' . $slug);
+    }
+
+    public function getLeafCategories($categories)
+    {
+        $leaves = collect();
+
+        foreach ($categories as $cat) {
+            if ($cat->children->isEmpty()) {
+                $leaves->push($cat);
+            } else {
+                $leaves = $leaves->merge($this->getLeafCategories($cat->children));
+            }
+        }
+
+        return $leaves;
     }
 }
