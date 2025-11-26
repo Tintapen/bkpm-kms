@@ -28,7 +28,7 @@ $isOpen = in_array($node->id, $open ?? []);
                        color: {{ $isActive ? '#2E66DB'
                             : ($isOpen ? '#1d4ed8'
                             : '#1e293b') }};">
-                {{ $node->name }}
+                 <span class="break-words whitespace-normal">{{ $node->name }}</span>
             </span>
 
             {{-- COUNT HANYA UNTUK LEVEL 0 --}}
