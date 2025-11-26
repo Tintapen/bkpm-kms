@@ -44,11 +44,9 @@ use App\Filament\Resources\ArticleResource;
 
                 {{-- Header --}}
                 <div class="flex justify-between items-start mb-2">
-                    <span class="inline-flex items-center gap-1 border rounded-md text-xs px-2 py-1
-                                    bg-primary-50 dark:bg-primary-900/20
-                                    text-primary-700 dark:text-primary-400
-                                    border-primary-200 dark:border-primary-800 shadow-sm">
-                        <x-filament::icon icon="heroicon-m-rectangle-stack" class="w-4 h-4" style="color: #2E66DB;" />
+                    <span class="inline-flex items-center gap-1 rounded-md text-xs px-2 py-1 shadow-sm"
+                        style="background:#2E66DB; color:#fff;">
+                        <x-filament::icon icon="heroicon-m-rectangle-stack" class="w-4 h-4" style="color: #fff;" />
                         {{ $article->category->name ?? $article->category }}
                     </span>
 
@@ -97,11 +95,9 @@ use App\Filament\Resources\ArticleResource;
                 {{-- Tags --}}
                 <div class="flex flex-wrap gap-2 mb-4">
                     @foreach($article->tags ?? [] as $tag)
-                    <span class="flex items-center gap-1 rounded-md text-xs px-2 py-1 shadow-sm border
-                                bg-primary-50 dark:bg-primary-900/20
-                                text-primary-700 dark:text-primary-300
-                                border-primary-200 dark:border-primary-800 transition">
-                        <x-filament::icon icon="heroicon-m-tag" class="w-4 h-4" style="color: #2E66DB;" />
+                    <span class="flex items-center gap-1 rounded-md text-xs px-2 py-1 shadow-sm"
+                        style="background:#2E66DB; color:#fff;">
+                        <x-filament::icon icon="heroicon-m-tag" class="w-4 h-4" style="color: #fff;" />
                         {{ $tag }}
                     </span>
                     @endforeach
